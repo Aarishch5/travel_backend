@@ -32,11 +32,13 @@ func CreateRider(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 	// validating the email
 	if msg := utils.ValidateEmail(req.Email); msg != nil {
 		utils.RespondError(w, http.StatusBadRequest, "invalid email address")
+		return
 	}
 
 	// validating the phone number
 	if msg := utils.ValidatePhoneNumber(req.Phone); msg != nil {
 		utils.RespondError(w, http.StatusBadRequest, "invalid phone number")
+		return
 	}
 
 	exists, err := dbHelper.GetRiderByEmailOrPhone(db, req.Email, req.Phone)

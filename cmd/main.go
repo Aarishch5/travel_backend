@@ -2,12 +2,14 @@ package main
 
 import (
 	"TravelBackend/database"
-	"TravelBackend/handlers"
+	"TravelBackend/server"
+	"context"
 	"log"
-	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 )
 
@@ -24,33 +26,27 @@ func main() {
 
 	log.Println("connected to database")
 
-	registerRoutes(database.DB)
-
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
+	myServer := server.SetupRoutes(database.DB)
+
 	log.Printf("server running on port %s", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
-		log.Fatalf("server failed: %v", err)
+	myServer.Start(":" + port)
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	log.Println("Shutting down the server")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := myServer.Shutdown(ctx); err != nil {
+		log.Fatalf("forcefully shutting down the server: %v", err)
 	}
-}
 
-func registerRoutes(db *sqlx.DB) {
-	// driver's apis
-	http.HandleFunc("/create-driver", func(w http.ResponseWriter, r *http.Request) {
-		handlers.CreateDriver(w, r, db)
-	})
-	http.HandleFunc("/delete-driver", func(w http.ResponseWriter, r *http.Request) {
-		handlers.DeleteDriver(w, r, db)
-	})
-
-	//rider's apis
-	http.HandleFunc("/create-rider", func(w http.ResponseWriter, r *http.Request) {
-		handlers.CreateRider(w, r, db)
-	})
-	http.HandleFunc("/delete-rider", func(w http.ResponseWriter, r *http.Request) {
-		handlers.DeleteRider(w, r, db)
-	})
+	log.Println("Server gracefully shutdown")
 }
