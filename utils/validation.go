@@ -18,7 +18,7 @@ func ValidateEmail(email string) error {
 }
 
 func ValidatePhoneNumber(phone string) error {
-	if !number.MatchString(phone) {
+	if !number.MatchString(phone) && len(phone) != 10 {
 		return errors.New("invalid phone number")
 	}
 	return nil
