@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 
@@ -23,9 +24,19 @@ func CreateRider(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 		return
 	}
 
-	if msg := utils.ValidateCreateRider(req.Name, req.Email, req.Phone); msg != "" {
-		utils.RespondError(w, http.StatusBadRequest, msg)
+	if strings.TrimSpace(req.Name) == "" {
+		http.Error(w, "name is required", http.StatusBadRequest)
 		return
+	}
+
+	// validating the email
+	if msg := utils.ValidateEmail(req.Email); msg != nil {
+		utils.RespondError(w, http.StatusBadRequest, "invalid email address")
+	}
+
+	// validating the phone number
+	if msg := utils.ValidatePhoneNumber(req.Phone); msg != nil {
+		utils.RespondError(w, http.StatusBadRequest, "invalid phone number")
 	}
 
 	exists, err := dbHelper.GetRiderByEmailOrPhone(db, req.Email, req.Phone)

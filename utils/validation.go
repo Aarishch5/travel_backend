@@ -1,29 +1,25 @@
 package utils
 
-import "strings"
+import (
+	"errors"
+	"regexp"
+)
 
-func ValidateCreateDriver(name, email, phone, license string) string {
-	switch {
-	case strings.TrimSpace(name) == "":
-		return "name is required"
-	case !strings.Contains(email, "@"):
-		return "a valid email is required"
-	case strings.TrimSpace(phone) == "":
-		return "phone is required"
-	case strings.TrimSpace(license) == "":
-		return "license_number is required"
+var (
+	number   = regexp.MustCompile(`[0-9]`)
+	emailExp = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
+)
+
+func ValidateEmail(email string) error {
+	if !emailExp.MatchString(email) {
+		return errors.New("invalid email address")
 	}
-	return ""
+	return nil
 }
 
-func ValidateCreateRider(name, email, phone string) string {
-	switch {
-	case strings.TrimSpace(name) == "":
-		return "name is required"
-	case !strings.Contains(email, "@"):
-		return "a valid email is required"
-	case strings.TrimSpace(phone) == "":
-		return "phone is required"
+func ValidatePhoneNumber(phone string) error {
+	if !number.MatchString(phone) {
+		return errors.New("invalid phone number")
 	}
-	return ""
+	return nil
 }

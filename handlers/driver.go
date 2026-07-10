@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 
@@ -24,8 +25,25 @@ func CreateDriver(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 		return
 	}
 
-	if msg := utils.ValidateCreateDriver(req.Name, req.Email, req.Phone, req.LicenseNumber); msg != "" {
-		utils.RespondError(w, http.StatusBadRequest, msg)
+	// validating the name
+	if strings.TrimSpace(req.Name) == "" {
+		http.Error(w, "name is required", http.StatusBadRequest)
+		return
+	}
+
+	// Validating the email
+	if msg := utils.ValidateEmail(req.Email); msg != nil {
+		utils.RespondError(w, http.StatusBadRequest, "invalid email address")
+	}
+
+	// validating the phone number
+	if msg := utils.ValidatePhoneNumber(req.Phone); msg != nil {
+		utils.RespondError(w, http.StatusBadRequest, "invalid phone number")
+	}
+
+	// validate the license
+	if strings.TrimSpace(req.LicenseNumber) == "" {
+		http.Error(w, "license_number is required", http.StatusBadRequest)
 		return
 	}
 
