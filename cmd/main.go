@@ -20,11 +20,9 @@ func main() {
 
 	err := database.OpenConnection()
 	if err != nil {
-		log.Fatalf("failed to connect to database: %v", err)
+		log.Fatal("Error connecting to database")
 	}
 	defer database.DB.Close()
-
-	log.Println("connected to database")
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -45,8 +43,8 @@ func main() {
 	defer cancel()
 
 	if err := myServer.Shutdown(ctx); err != nil {
-		log.Fatalf("forcefully shutting down the server: %v", err)
+		log.Fatal("Error shutting down the server")
 	}
 
-	log.Println("Server gracefully shutdown")
+	log.Println("Server gracefully shut down")
 }
