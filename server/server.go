@@ -23,7 +23,7 @@ const (
 
 func SetupRoutes(db *sqlx.DB) *Server {
 	mux := http.NewServeMux()
-	// rider's apis
+	// rider's auth
 	mux.HandleFunc("/v1/riders/register", func(w http.ResponseWriter, r *http.Request) {
 		handlers.RegisterRider(w, r, db)
 	})
@@ -34,7 +34,7 @@ func SetupRoutes(db *sqlx.DB) *Server {
 		handlers.DeleteRider(w, r, db)
 	})
 
-	// driver's apis
+	// driver's auth
 	mux.HandleFunc("/v1/drivers/register", func(w http.ResponseWriter, r *http.Request) {
 		handlers.RegisterDriver(w, r, db)
 	})
@@ -48,6 +48,13 @@ func SetupRoutes(db *sqlx.DB) *Server {
 	mux.HandleFunc("/v1/drivers/status", middleware.Authenticate(middleware.RequireRole("driver",
 		func(w http.ResponseWriter, r *http.Request) {
 			handlers.UpdateDriverStatus(w, r, db)
+		},
+	)))
+
+	// driver location update
+	mux.HandleFunc("/v1/drivers/location", middleware.Authenticate(middleware.RequireRole("driver",
+		func(w http.ResponseWriter, r *http.Request) {
+			handlers.UpdateDriverLocation(w, r, db)
 		},
 	)))
 
