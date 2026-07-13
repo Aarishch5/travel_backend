@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"TravelBackend/middleware"
+	"TravelBackend/services"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -13,7 +15,7 @@ import (
 	"TravelBackend/utils"
 )
 
-func CreateDriver(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
+func RegisterDriver(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 	if r.Method != http.MethodPost {
 		utils.RespondError(w, http.StatusMethodNotAllowed, "only POST is allowed")
 		return
@@ -49,34 +51,103 @@ func CreateDriver(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 		return
 	}
 
-	exists, err := dbHelper.GetDriverByEmailOrPhone(db, req.Email, req.Phone)
-	if err != nil {
-		log.Println("GetDriverByEmailOrPhone error:", err)
-		utils.RespondError(w, http.StatusInternalServerError, "something went wrong")
+	// Validate the password
+	if err := utils.ValidatePassword(req.Password); err != nil {
+		utils.RespondError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	if exists {
+
+	driver, err := services.RegisterDriver(db, req)
+	if err == models.ErrEmailOrPhoneExists {
 		utils.RespondError(w, http.StatusConflict, "driver with this email or phone already exists")
 		return
 	}
 
-	id, err := dbHelper.CreateDriver(db, req)
 	if err != nil {
-		log.Println("CreateDriver error:", err)
-		utils.RespondError(w, http.StatusInternalServerError, "could not create driver")
+		log.Println("RegisterDriver error:", err)
+		utils.RespondError(w, http.StatusInternalServerError, "could not register driver")
 		return
 	}
 
-	driver, err := dbHelper.GetDriverByID(db, id)
+	token, err := utils.GenerateToken(driver.ID, "driver")
 	if err != nil {
-		log.Println("GetDriverByID error:", err)
-		utils.RespondError(w, http.StatusInternalServerError, "driver created but could not be fetched")
+		log.Println("GenerateToken error:", err)
+		utils.RespondError(w, http.StatusInternalServerError, "driver registered but token generation failed")
 		return
 	}
 
-	utils.RespondJSON(w, http.StatusCreated, map[string]interface{}{
-		"message": "driver created successfully",
-		"driver":  driver,
+	utils.RespondJSON(w, http.StatusCreated, models.AuthResponse{
+		Token: token,
+		User:  driver,
+	})
+}
+
+func UpdateDriverStatus(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
+	if r.Method != http.MethodPatch {
+		utils.RespondError(w, http.StatusMethodNotAllowed, "only PATCH is allowed")
+		return
+	}
+
+	claims, ok := middleware.ClaimsFromContext(r.Context())
+	if !ok {
+		utils.RespondError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	var req models.UpdateDriverStatusRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.RespondError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	if !models.IsValidDriverStatus(req.Status) {
+		utils.RespondError(w, http.StatusBadRequest, "status must be one of ONLINE, OFFLINE, ON_TRIP")
+		return
+	}
+
+	err := services.UpdateDriverStatus(db, claims.UserID, req.Status)
+	if err == models.ErrDriverNotFound {
+		utils.RespondError(w, http.StatusNotFound, "driver not found")
+		return
+	}
+	if err != nil {
+		log.Println("UpdateDriverStatus error:", err)
+		utils.RespondError(w, http.StatusInternalServerError, "could not update driver status")
+		return
+	}
+
+	utils.RespondJSON(w, http.StatusOK, map[string]string{
+		"message": "driver status updated successfully",
+		"status":  req.Status,
+	})
+}
+
+func LoginDriver(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
+	if r.Method != http.MethodPost {
+		utils.RespondError(w, http.StatusMethodNotAllowed, "only POST is allowed")
+		return
+	}
+
+	var req models.LoginDriverRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.RespondError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	token, driver, err := services.LoginDriver(db, req)
+	if err == models.ErrInvalidCredentials {
+		utils.RespondError(w, http.StatusUnauthorized, "invalid email or password")
+		return
+	}
+	if err != nil {
+		log.Println("LoginDriver error:", err)
+		utils.RespondError(w, http.StatusInternalServerError, "something went wrong")
+		return
+	}
+
+	utils.RespondJSON(w, http.StatusOK, models.AuthResponse{
+		Token: token,
+		User:  driver,
 	})
 }
 

@@ -2,6 +2,7 @@ package server
 
 import (
 	"TravelBackend/handlers"
+	"TravelBackend/middleware"
 	"context"
 	"net/http"
 	"time"
@@ -10,7 +11,7 @@ import (
 )
 
 type Server struct {
-	router *http.ServeMux
+	router http.Handler
 	server *http.Server
 }
 
@@ -22,24 +23,39 @@ const (
 
 func SetupRoutes(db *sqlx.DB) *Server {
 	mux := http.NewServeMux()
-	// driver's apis
-	mux.HandleFunc("/create-driver", func(w http.ResponseWriter, r *http.Request) {
-		handlers.CreateDriver(w, r, db)
-	})
-	mux.HandleFunc("/delete-driver", func(w http.ResponseWriter, r *http.Request) {
-		handlers.DeleteDriver(w, r, db)
-	})
-
 	// rider's apis
-	mux.HandleFunc("/create-rider", func(w http.ResponseWriter, r *http.Request) {
-		handlers.CreateRider(w, r, db)
+	mux.HandleFunc("/v1/riders/register", func(w http.ResponseWriter, r *http.Request) {
+		handlers.RegisterRider(w, r, db)
 	})
-	mux.HandleFunc("/delete-rider", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/v1/riders/login", func(w http.ResponseWriter, r *http.Request) {
+		handlers.LoginRider(w, r, db)
+	})
+	mux.HandleFunc("/v1/riders/delete", func(w http.ResponseWriter, r *http.Request) {
 		handlers.DeleteRider(w, r, db)
 	})
 
+	// driver's apis
+	mux.HandleFunc("/v1/drivers/register", func(w http.ResponseWriter, r *http.Request) {
+		handlers.RegisterDriver(w, r, db)
+	})
+	mux.HandleFunc("/v1/drivers/login", func(w http.ResponseWriter, r *http.Request) {
+		handlers.LoginDriver(w, r, db)
+	})
+	mux.HandleFunc("/v1/drivers/delete", func(w http.ResponseWriter, r *http.Request) {
+		handlers.DeleteDriver(w, r, db)
+	})
+
+	mux.HandleFunc("/v1/drivers/status", middleware.Authenticate(middleware.RequireRole("driver",
+		func(w http.ResponseWriter, r *http.Request) {
+			handlers.UpdateDriverStatus(w, r, db)
+		},
+	)))
+
+	var handler http.Handler = mux
+	handler = middleware.Logging(handler.ServeHTTP)
+
 	return &Server{
-		router: mux,
+		router: handler,
 	}
 }
 
@@ -59,7 +75,7 @@ func (s *Server) Start(addr string) {
 	}()
 }
 
-// to shut down the server
+// to gracefully shut down the server
 
 func (s *Server) Shutdown(ctx context.Context) error {
 	return s.server.Shutdown(ctx)

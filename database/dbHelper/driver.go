@@ -9,14 +9,14 @@ import (
 	"TravelBackend/models"
 )
 
-func CreateDriver(db *sqlx.DB, req models.CreateDriverRequest) (string, error) {
+func CreateDriver(db *sqlx.DB, req models.CreateDriverRequest, passwordHash string) (string, error) {
 	var id string
 	query := `
-		INSERT INTO drivers (name, email, phone, license_number, vehicle_model, plate_number)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		INSERT INTO drivers (name, email, phone, license_number, vehicle_model, plate_number, password_hash)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id`
 	err := db.Get(&id, query, req.Name, req.Email, req.Phone, req.LicenseNumber,
-		req.VehicleModel, req.PlateNumber)
+		req.VehicleModel, req.PlateNumber, passwordHash)
 	return id, err
 }
 
@@ -39,6 +39,35 @@ func GetDriverByID(db *sqlx.DB, id string) (*models.Driver, error) {
 		return nil, err
 	}
 	return &d, nil
+}
+
+func GetDriverByEmail(db *sqlx.DB, email string) (*models.Driver, error) {
+	var d models.Driver
+	query := `SELECT id, name, email, phone, license_number, vehicle_model, plate_number, status, avg_rating, password_hash, created_at
+		FROM drivers WHERE email = $1`
+	err := db.Get(&d, query, email)
+	if err == sql.ErrNoRows {
+		return nil, models.ErrDriverNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &d, nil
+}
+
+func UpdateDriverStatus(db *sqlx.DB, id, status string) error {
+	result, err := db.Exec(`UPDATE drivers SET status = $1 WHERE id = $2`, status, id)
+	if err != nil {
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return models.ErrDriverNotFound
+	}
+	return nil
 }
 
 func DeleteDriver(db *sqlx.DB, id string) error {

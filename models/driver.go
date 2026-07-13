@@ -12,6 +12,8 @@ type Driver struct {
 	PlateNumber   string    `json:"plate_number" db:"plate_number"`
 	AvgRating     float64   `json:"avg_rating" db:"avg_rating"`
 	CreatedAt     time.Time `json:"created_at" db:"created_at"`
+	Status        string    `json:"status" db:"status"`
+	PasswordHash  string    `json:"-" db:"password_hash"`
 }
 
 type CreateDriverRequest struct {
@@ -21,4 +23,29 @@ type CreateDriverRequest struct {
 	LicenseNumber string `json:"license_number"`
 	VehicleModel  string `json:"vehicle_model"`
 	PlateNumber   string `json:"plate_number"`
+	Password      string `json:"password"`
+}
+
+type LoginDriverRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type UpdateDriverStatusRequest struct {
+	Status string `json:"status"`
+}
+
+const (
+	DriverStatusOnline  = "ONLINE"
+	DriverStatusOffline = "OFFLINE"
+	DriverStatusOnTrip  = "ON_TRIP"
+)
+
+func IsValidDriverStatus(status string) bool {
+	switch status {
+	case DriverStatusOnline, DriverStatusOffline, DriverStatusOnTrip:
+		return true
+	default:
+		return false
+	}
 }

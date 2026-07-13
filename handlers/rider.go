@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"TravelBackend/services"
 	"encoding/json"
+	"log"
 	"net/http"
 	"strings"
 
@@ -12,7 +14,7 @@ import (
 	"TravelBackend/utils"
 )
 
-func CreateRider(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
+func RegisterRider(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 	if r.Method != http.MethodPost {
 		utils.RespondError(w, http.StatusMethodNotAllowed, "only POST is allowed")
 		return
@@ -41,31 +43,64 @@ func CreateRider(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 		return
 	}
 
-	exists, err := dbHelper.GetRiderByEmailOrPhone(db, req.Email, req.Phone)
-	if err != nil {
-		utils.RespondError(w, http.StatusInternalServerError, "something went wrong")
+	// Validate the password
+	if err := utils.ValidatePassword(req.Password); err != nil {
+		utils.RespondError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	if exists {
+
+	rider, err := services.RegisterRider(db, req)
+	if err == models.ErrEmailOrPhoneExists {
 		utils.RespondError(w, http.StatusConflict, "rider with this email or phone already exists")
 		return
 	}
 
-	id, err := dbHelper.CreateRider(db, req)
 	if err != nil {
-		utils.RespondError(w, http.StatusInternalServerError, "could not create rider")
+		log.Println("RegisterRider error:", err)
+		utils.RespondError(w, http.StatusInternalServerError, "could not register rider")
 		return
 	}
 
-	rider, err := dbHelper.GetRiderByID(db, id)
+	token, err := utils.GenerateToken(rider.ID, "rider")
 	if err != nil {
-		utils.RespondError(w, http.StatusInternalServerError, "rider created but could not be fetched")
+		log.Println("GenerateToken error:", err)
+		utils.RespondError(w, http.StatusInternalServerError, "rider registered but token generation failed")
 		return
 	}
 
-	utils.RespondJSON(w, http.StatusCreated, map[string]interface{}{
-		"message": "rider created successfully",
-		"rider":   rider,
+	utils.RespondJSON(w, http.StatusCreated, models.AuthResponse{
+		Token: token,
+		User:  rider,
+	})
+
+}
+
+func LoginRider(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
+	if r.Method != http.MethodPost {
+		utils.RespondError(w, http.StatusMethodNotAllowed, "only POST is allowed")
+		return
+	}
+
+	var req models.LoginRiderRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.RespondError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	token, rider, err := services.LoginRider(db, req)
+	if err == models.ErrInvalidCredentials {
+		utils.RespondError(w, http.StatusUnauthorized, "invalid email or password")
+		return
+	}
+	if err != nil {
+		log.Println("LoginRider error:", err)
+		utils.RespondError(w, http.StatusInternalServerError, "something went wrong")
+		return
+	}
+
+	utils.RespondJSON(w, http.StatusOK, models.AuthResponse{
+		Token: token,
+		User:  rider,
 	})
 }
 
