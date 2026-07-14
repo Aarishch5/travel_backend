@@ -58,6 +58,32 @@ func SetupRoutes(db *sqlx.DB) *Server {
 		},
 	)))
 
+	// driver's pending ride requests
+	mux.HandleFunc("/v1/drivers/rides/pending", middleware.Authenticate(middleware.RequireRole("driver",
+		func(w http.ResponseWriter, r *http.Request) {
+			handlers.GetPendingRides(w, r, db)
+		},
+	)))
+
+	// rider requests a ride
+	mux.HandleFunc("/v1/rides/request", middleware.Authenticate(middleware.RequireRole("rider",
+		func(w http.ResponseWriter, r *http.Request) {
+			handlers.RequestRide(w, r, db)
+		},
+	)))
+
+	// driver can accept or reject a ride
+	mux.HandleFunc("/v1/rides/{id}/accept", middleware.Authenticate(middleware.RequireRole("driver",
+		func(w http.ResponseWriter, r *http.Request) {
+			handlers.AcceptRide(w, r, db)
+		},
+	)))
+	mux.HandleFunc("/v1/rides/{id}/reject", middleware.Authenticate(middleware.RequireRole("driver",
+		func(w http.ResponseWriter, r *http.Request) {
+			handlers.RejectRide(w, r, db)
+		},
+	)))
+
 	var handler http.Handler = mux
 	handler = middleware.Logging(handler.ServeHTTP)
 

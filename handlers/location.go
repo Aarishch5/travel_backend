@@ -42,6 +42,6 @@ func UpdateDriverLocation(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 	}
 
 	utils.RespondJSON(w, http.StatusOK, map[string]string{
-		"message": "location updated successfully via PostGIS",
+		"message": "location updated successfully",
 	})
 }

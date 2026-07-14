@@ -36,7 +36,7 @@ func RegisterRider(db *sqlx.DB, req models.CreateRiderRequest) (*models.Rider, e
 	return dbHelper.GetRiderByID(db, id)
 }
 
-// validate the registered driver
+// validates the registered driver
 
 func LoginRider(db *sqlx.DB, req models.LoginRiderRequest) (string, *models.Rider, error) {
 	rider, err := dbHelper.GetRiderByEmail(db, req.Email)

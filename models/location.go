@@ -4,7 +4,8 @@ import "time"
 
 type DriverLocation struct {
 	DriverID  string    `json:"driver_id" db:"driver_id"`
-	Location  string    `json:"location" db:"location"` // Will be read/written as Hex/WKT strings if scanned directly
+	Latitude  float64   `json:"latitude" db:"latitude"`
+	Longitude float64   `json:"longitude" db:"longitude"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }
 
