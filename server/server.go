@@ -21,29 +21,29 @@ const (
 	writeTimeout      = 5 * time.Minute
 )
 
+func public(h func(w http.ResponseWriter, r *http.Request, db *sqlx.DB), db *sqlx.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		h(w, r, db)
+	}
+}
+
+func registerRiderRoutes(mux *http.ServeMux, db *sqlx.DB) {
+	mux.HandleFunc("/v1/riders/register", public(handlers.RegisterRider, db))
+	mux.HandleFunc("/v1/riders/login", public(handlers.LoginRider, db))
+	mux.HandleFunc("/v1/riders/delete", public(handlers.DeleteRider, db))
+}
+
+func registerDriverRoutes(mux *http.ServeMux, db *sqlx.DB) {
+	mux.HandleFunc("/v1/drivers/register", public(handlers.RegisterDriver, db))
+	mux.HandleFunc("/v1/drivers/login", public(handlers.LoginDriver, db))
+	mux.HandleFunc("/v1/drivers/delete", public(handlers.DeleteDriver, db))
+}
+
 func SetupRoutes(db *sqlx.DB) *Server {
 	mux := http.NewServeMux()
-	// rider's auth
-	mux.HandleFunc("/v1/riders/register", func(w http.ResponseWriter, r *http.Request) {
-		handlers.RegisterRider(w, r, db)
-	})
-	mux.HandleFunc("/v1/riders/login", func(w http.ResponseWriter, r *http.Request) {
-		handlers.LoginRider(w, r, db)
-	})
-	mux.HandleFunc("/v1/riders/delete", func(w http.ResponseWriter, r *http.Request) {
-		handlers.DeleteRider(w, r, db)
-	})
 
-	// driver's auth
-	mux.HandleFunc("/v1/drivers/register", func(w http.ResponseWriter, r *http.Request) {
-		handlers.RegisterDriver(w, r, db)
-	})
-	mux.HandleFunc("/v1/drivers/login", func(w http.ResponseWriter, r *http.Request) {
-		handlers.LoginDriver(w, r, db)
-	})
-	mux.HandleFunc("/v1/drivers/delete", func(w http.ResponseWriter, r *http.Request) {
-		handlers.DeleteDriver(w, r, db)
-	})
+	registerRiderRoutes(mux, db)
+	registerDriverRoutes(mux, db)
 
 	mux.HandleFunc("/v1/drivers/status", middleware.Authenticate(middleware.RequireRole("driver",
 		func(w http.ResponseWriter, r *http.Request) {
@@ -51,28 +51,24 @@ func SetupRoutes(db *sqlx.DB) *Server {
 		},
 	)))
 
-	// driver location update
 	mux.HandleFunc("/v1/drivers/location", middleware.Authenticate(middleware.RequireRole("driver",
 		func(w http.ResponseWriter, r *http.Request) {
 			handlers.UpdateDriverLocation(w, r, db)
 		},
 	)))
 
-	// driver's pending ride requests
 	mux.HandleFunc("/v1/drivers/rides/pending", middleware.Authenticate(middleware.RequireRole("driver",
 		func(w http.ResponseWriter, r *http.Request) {
 			handlers.GetPendingRides(w, r, db)
 		},
 	)))
 
-	// rider requests a ride
 	mux.HandleFunc("/v1/rides/request", middleware.Authenticate(middleware.RequireRole("rider",
 		func(w http.ResponseWriter, r *http.Request) {
 			handlers.RequestRide(w, r, db)
 		},
 	)))
 
-	// driver can accept or reject a ride
 	mux.HandleFunc("/v1/rides/{id}/accept", middleware.Authenticate(middleware.RequireRole("driver",
 		func(w http.ResponseWriter, r *http.Request) {
 			handlers.AcceptRide(w, r, db)

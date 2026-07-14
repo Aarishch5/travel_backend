@@ -13,16 +13,14 @@ func FindNearbyDrivers(db *sqlx.DB, lat, lng float64) ([]models.NearbyDriver, er
 		SELECT driver_id, distance_km FROM (
 			SELECT dl.driver_id,
 			       (6371 * acos(
-			           cos(radians($1)) * cos(radians(dl.latitude)) * cos(radians(dl.longitude) - radians($2))
+			       cos(radians($1)) * cos(radians(dl.latitude)) * cos(radians(dl.longitude) - radians($2))
 			           + sin(radians($1)) * sin(radians(dl.latitude))
 			       )) AS distance_km
 			FROM driver_locations dl
 			JOIN drivers d ON d.id = dl.driver_id
 			WHERE d.status = 'ONLINE'
 		) sub
-		WHERE distance_km < 5
-		ORDER BY distance_km
-		LIMIT 5`
+		WHERE distance_km < 5 ORDER BY distance_km LIMIT 5`
 
 	var drivers []models.NearbyDriver
 	err := db.Select(&drivers, query, lat, lng)
@@ -33,8 +31,7 @@ func CreateRide(db *sqlx.DB, riderID string, req models.RequestRideRequest) (str
 	var id string
 	query := `
 		INSERT INTO rides (rider_id, pickup_lat, pickup_lng, drop_lat, drop_lng, status)
-		VALUES ($1, $2, $3, $4, $5, 'REQUESTED')
-		RETURNING id`
+		VALUES ($1, $2, $3, $4, $5, 'REQUESTED') RETURNING id`
 	err := db.Get(&id, query, riderID, req.PickupLat, req.PickupLng, req.DropLat, req.DropLng)
 	return id, err
 }
@@ -50,8 +47,9 @@ func GetRideByID(db *sqlx.DB, rideID string) (*models.Ride, error) {
 	var ride models.Ride
 	query := `
 		SELECT id, rider_id, driver_id, status, pickup_lat, pickup_lng, drop_lat, drop_lng,
-		       requested_at, accepted_at, updated_at
+		       requested_at, accepted_at, updated_at 
 		FROM rides WHERE id = $1`
+
 	err := db.Get(&ride, query, rideID)
 	if err == sql.ErrNoRows {
 		return nil, models.ErrRideNotFound

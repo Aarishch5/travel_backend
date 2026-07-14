@@ -37,7 +37,7 @@ func RequestRide(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 		return
 	}
 	if req.DropLat == 0 && req.DropLng == 0 {
-		utils.RespondError(w, http.StatusBadRequest, "drop_lat and drop_lng are required")
+		utils.RespondError(w, http.StatusBadRequest, "dropping latitude and longitude are required")
 		return
 	}
 

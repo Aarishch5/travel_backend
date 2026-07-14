@@ -45,7 +45,7 @@ func RequireRole(role string, next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 		if claims.Role != role {
-			utils.RespondError(w, http.StatusForbidden, "forbidden: insufficient permissions")
+			utils.RespondError(w, http.StatusForbidden, "forbidden")
 			return
 		}
 		next.ServeHTTP(w, r)
