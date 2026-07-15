@@ -17,4 +17,5 @@ ALTER TABLE ride_offers
 
 
 
+
 COMMIT;
