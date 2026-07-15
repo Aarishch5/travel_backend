@@ -15,12 +15,13 @@ CREATE TABLE IF NOT EXISTS rides (
     );
 
 ALTER TABLE rides
-    ADD CONSTRAINT rides_status_check CHECK (
-        status IN ('REQUESTED', 'ACCEPTED', 'REJECTED', 'CANCELLED', 'COMPLETED', 'NO_DRIVERS_FOUND')
-        );
+    ADD CONSTRAINT rides_status_check CHECK
+        (
+        status IN ('REQUESTED', 'ACCEPTED', 'REJECTED',
+                   'CANCELLED', 'COMPLETED', 'NO_DRIVERS_FOUN')
+    );
 
-CREATE INDEX IF NOT EXISTS idx_rides_driver_id ON rides(driver_id);
-CREATE INDEX IF NOT EXISTS idx_rides_rider_id ON rides(rider_id);
+
 
 COMMIT;
 
