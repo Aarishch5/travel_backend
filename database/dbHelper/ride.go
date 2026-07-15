@@ -169,7 +169,7 @@ func MarkRideCompleted(db *sqlx.DB, rideID, driverID string) (*models.Ride, erro
 		return nil, err
 	}
 
-	if ride.DriverID == nil || *ride.DriverID == driverID {
+	if ride.DriverID == nil || *ride.DriverID != driverID {
 		return nil, models.ErrRideNotActive
 	}
 
@@ -204,7 +204,7 @@ func MarkRideCompleted(db *sqlx.DB, rideID, driverID string) (*models.Ride, erro
 		return nil, err
 	}
 
-	_, err = db.Exec(`UPDATE driver SET status = 'ONLINE' WHERE id = $1`, driverID)
+	_, err = db.Exec(`UPDATE drivers SET status = 'ONLINE' WHERE id = $1`, driverID)
 	if err != nil {
 		return nil, err
 	}
