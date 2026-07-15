@@ -84,3 +84,7 @@ func DeleteDriver(db *sqlx.DB, id string) error {
 	}
 	return nil
 }
+
+//func DriverLocation(db *sqlx.DB, id string) (*models.DriverLocation, error) {
+//
+//}

@@ -178,3 +178,17 @@ func DeleteDriver(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 		"message": "driver deleted successfully",
 	})
 }
+
+//func GetDriverLocation(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
+//	if r.Method != http.MethodGet {
+//		utils.RespondError(w, http.StatusMethodNotAllowed, "only GET is allowed")
+//		return
+//	}
+//
+//	driverID := r.URL.Query().Get("id")
+//	if driverID == "" {
+//		utils.RespondError(w, http.StatusBadRequest, "driver id query parameter is required")
+//		return
+//	}
+//
+//}
