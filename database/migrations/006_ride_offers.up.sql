@@ -15,7 +15,6 @@ ALTER TABLE ride_offers
         status IN ('PENDING', 'ACCEPTED', 'REJECTED', 'EXPIRED')
         );
 
-CREATE INDEX IF NOT EXISTS idx_ride_offers_ride_id ON ride_offers(ride_id);
-CREATE INDEX IF NOT EXISTS idx_ride_offers_driver_id ON ride_offers(driver_id);
+
 
 COMMIT;

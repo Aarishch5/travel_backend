@@ -7,6 +7,6 @@ CREATE TABLE IF NOT EXISTS driver_locations (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
     );
 
-CREATE INDEX IF NOT EXISTS idx_driver_locations_updated_at ON driver_locations(updated_at);
+
 
 COMMIT;
