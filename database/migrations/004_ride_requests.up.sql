@@ -22,6 +22,10 @@ ALTER TABLE rides
     );
 
 
+ALTER TABLE rides ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ;
+
+
+
 
 COMMIT;
 

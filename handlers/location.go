@@ -20,7 +20,7 @@ func UpdateDriverLocation(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 		return
 	}
 
-	var req models.UpdateLocationRequest
+	var req models.DriverLocation
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		utils.RespondError(w, http.StatusBadRequest, "invalid request body")
 		return

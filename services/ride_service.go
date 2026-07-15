@@ -77,3 +77,7 @@ func RejectRide(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
 	}
 	return dbHelper.GetRideByID(db, rideID)
 }
+
+func CompleteRide(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
+	return dbHelper.MarkRideCompleted(db, rideID, driverID)
+}

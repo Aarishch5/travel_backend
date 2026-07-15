@@ -138,3 +138,38 @@ func GetPendingRides(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 
 	utils.RespondJSON(w, http.StatusOK, rides)
 }
+
+func RideCompleted(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
+	if r.Method != http.MethodPatch {
+		utils.RespondError(w, http.StatusMethodNotAllowed, "only PATCH is allowed")
+		return
+	}
+
+	claims, ok := middleware.ClaimsFromContext(r.Context())
+	if !ok {
+		utils.RespondError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	rideID := r.PathValue("id")
+	if rideID == "" {
+		utils.RespondError(w, http.StatusBadRequest, "ride id is required")
+		return
+	}
+
+	ride, err := services.CompleteRide(db, rideID, claims.UserID)
+	switch err {
+	case nil:
+		utils.RespondJSON(w, http.StatusOK, ride)
+	case models.ErrRideNotActive:
+		utils.RespondError(w, http.StatusConflict, "ride is not assigned or  not accepted")
+	case models.ErrNotAtDroppingLocation:
+		utils.RespondError(w, http.StatusConflict, "you are too far from the drop location points")
+	case models.ErrRideNotFound:
+		utils.RespondError(w, http.StatusNotFound, "ride not found")
+	default:
+		log.Println("RideCompleted error:", err)
+		utils.RespondError(w, http.StatusInternalServerError, "could not complete ride")
+	}
+
+}

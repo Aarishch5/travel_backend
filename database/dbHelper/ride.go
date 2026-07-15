@@ -162,3 +162,51 @@ func GetPendingRidesForDriver(db *sqlx.DB, driverID string) ([]models.Ride, erro
 	err := db.Select(&rides, query, driverID)
 	return rides, err
 }
+
+func MarkRideCompleted(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
+	ride, err := GetRideByID(db, rideID)
+	if err != nil {
+		return nil, err
+	}
+
+	if ride.DriverID == nil || *ride.DriverID == driverID {
+		return nil, models.ErrRideNotActive
+	}
+
+	if ride.Status != models.RideStatusAccepted {
+		return nil, models.ErrRideNotActive
+	}
+
+	var loc models.DriverLocation
+	err = db.Get(&loc, `SELECT driver_id, latitude, longitude, updated_at FROM driver_locations WHERE driver_id = $1`, driverID)
+	if err != nil {
+		return nil, err
+	}
+
+	var distanceMeters float64
+
+	err = db.Get(&distanceMeters, `
+		SELECT 6371000 * acos(
+			cos(radians($1)) * cos(radians($2)) * cos(radians($3) - radians($4))
+			+ sin(radians($1)) * sin(radians($2))
+		)`, loc.Latitude, ride.DropLat, loc.Longitude, ride.DropLng)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if distanceMeters > 10 {
+		return nil, models.ErrNotAtDroppingLocation
+	}
+
+	_, err = db.Exec(`UPDATE rides SET status = 'COMPLETED', completed_at = now(), updated_at = now() WHERE id = $1`, rideID)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = db.Exec(`UPDATE driver SET status = 'ONLINE' WHERE id = $1`, driverID)
+	if err != nil {
+		return nil, err
+	}
+	return GetRideByID(db, rideID)
+}

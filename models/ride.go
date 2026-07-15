@@ -4,6 +4,7 @@ import "time"
 
 const (
 	RideStatusRequested = "REQUESTED"
+	RideStatusAccepted  = "ACCEPTED"
 )
 
 type Ride struct {
