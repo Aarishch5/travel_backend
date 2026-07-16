@@ -8,7 +8,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"TravelBackend/database/dbHelper"
+	"TravelBackend/database/repository"
 	"TravelBackend/models"
 	"TravelBackend/utils"
 )
@@ -123,7 +123,7 @@ func DeleteRider(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 		return
 	}
 
-	err := dbHelper.DeleteRider(db, id)
+	err := repository.DeleteRider(db, id)
 	if err == models.ErrRiderNotFound {
 		utils.RespondError(w, http.StatusNotFound, "rider not found")
 		return

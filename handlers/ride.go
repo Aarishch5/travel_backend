@@ -6,7 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"TravelBackend/database/dbHelper"
+	"TravelBackend/database/repository"
 	"TravelBackend/middleware"
 	"TravelBackend/models"
 	"TravelBackend/services"
@@ -120,7 +120,7 @@ func GetPendingRides(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 		return
 	}
 
-	rides, err := dbHelper.GetPendingRidesForDriver(db, claims.UserID)
+	rides, err := repository.GetPendingRidesForDriver(db, claims.UserID)
 	if err != nil {
 		log.Println("GetPendingRides error:", err)
 		utils.RespondError(w, http.StatusInternalServerError, "could not fetch pending rides")

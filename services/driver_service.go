@@ -5,7 +5,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"TravelBackend/database/dbHelper"
+	"TravelBackend/database/repository"
 	"TravelBackend/models"
 	"TravelBackend/utils"
 )
@@ -15,7 +15,7 @@ import (
 func RegisterDriver(db *sqlx.DB, req models.CreateDriverRequest) (*models.Driver, error) {
 	req.Name = strings.TrimSpace(req.Name)
 
-	exists, err := dbHelper.GetDriverByEmailOrPhone(db, req.Email, req.Phone)
+	exists, err := repository.GetDriverByEmailOrPhone(db, req.Email, req.Phone)
 	if err != nil {
 		return nil, err
 	}
@@ -28,18 +28,18 @@ func RegisterDriver(db *sqlx.DB, req models.CreateDriverRequest) (*models.Driver
 		return nil, err
 	}
 
-	id, err := dbHelper.CreateDriver(db, req, hash)
+	id, err := repository.CreateDriver(db, req, hash)
 	if err != nil {
 		return nil, err
 	}
 
-	return dbHelper.GetDriverByID(db, id)
+	return repository.GetDriverByID(db, id)
 }
 
 //Verifying the registered driver
 
 func LoginDriver(db *sqlx.DB, req models.LoginDriverRequest) (string, *models.Driver, error) {
-	driver, err := dbHelper.GetDriverByEmail(db, req.Email)
+	driver, err := repository.GetDriverByEmail(db, req.Email)
 	if err == models.ErrDriverNotFound {
 		return "", nil, models.ErrInvalidCredentials
 	}
@@ -66,5 +66,5 @@ func UpdateDriverStatus(db *sqlx.DB, driverID, status string) error {
 	if !models.IsValidDriverStatus(status) {
 		return models.ErrInvalidDriverStatus
 	}
-	return dbHelper.UpdateDriverStatus(db, driverID, status)
+	return repository.UpdateDriverStatus(db, driverID, status)
 }

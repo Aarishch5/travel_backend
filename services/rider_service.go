@@ -5,7 +5,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"TravelBackend/database/dbHelper"
+	"TravelBackend/database/repository"
 	"TravelBackend/models"
 	"TravelBackend/utils"
 )
@@ -15,7 +15,7 @@ import (
 func RegisterRider(db *sqlx.DB, req models.CreateRiderRequest) (*models.Rider, error) {
 	req.Name = strings.TrimSpace(req.Name)
 
-	exists, err := dbHelper.GetRiderByEmailOrPhone(db, req.Email, req.Phone)
+	exists, err := repository.GetRiderByEmailOrPhone(db, req.Email, req.Phone)
 	if err != nil {
 		return nil, err
 	}
@@ -28,18 +28,18 @@ func RegisterRider(db *sqlx.DB, req models.CreateRiderRequest) (*models.Rider, e
 		return nil, err
 	}
 
-	id, err := dbHelper.CreateRider(db, req, hash)
+	id, err := repository.CreateRider(db, req, hash)
 	if err != nil {
 		return nil, err
 	}
 
-	return dbHelper.GetRiderByID(db, id)
+	return repository.GetRiderByID(db, id)
 }
 
 // validating the registered driver
 
 func LoginRider(db *sqlx.DB, req models.LoginRiderRequest) (string, *models.Rider, error) {
-	rider, err := dbHelper.GetRiderByEmail(db, req.Email)
+	rider, err := repository.GetRiderByEmail(db, req.Email)
 	if err == models.ErrRiderNotFound {
 		return "", nil, models.ErrInvalidCredentials
 	}

@@ -5,7 +5,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"TravelBackend/database/dbHelper"
+	"TravelBackend/database/repository"
 	"TravelBackend/models"
 )
 
@@ -25,21 +25,21 @@ func lockForRide(rideID string) *sync.Mutex {
 }
 
 func RequestRide(db *sqlx.DB, riderID string, req models.RideRequest) (*models.Ride, error) {
-	rideID, err := dbHelper.CreateRide(db, riderID, req)
+	rideID, err := repository.CreateRide(db, riderID, req)
 	if err != nil {
 		return nil, err
 	}
 
-	drivers, err := dbHelper.FindNearbyDrivers(db, req.PickupLat, req.PickupLng)
+	drivers, err := repository.FindNearbyDrivers(db, req.PickupLat, req.PickupLng)
 	if err != nil {
 		return nil, err
 	}
 
 	if len(drivers) == 0 {
-		if err := dbHelper.MarkRideNoDriversFound(db, rideID); err != nil {
+		if err := repository.MarkRideNoDriversFound(db, rideID); err != nil {
 			return nil, err
 		}
-		return dbHelper.GetRideByID(db, rideID)
+		return repository.GetRideByID(db, rideID)
 	}
 
 	driverIDs := make([]string, len(drivers))
@@ -47,11 +47,11 @@ func RequestRide(db *sqlx.DB, riderID string, req models.RideRequest) (*models.R
 		driverIDs[i] = d.DriverID
 	}
 
-	if err := dbHelper.CreateRideOffers(db, rideID, driverIDs); err != nil {
+	if err := repository.CreateRideOffers(db, rideID, driverIDs); err != nil {
 		return nil, err
 	}
 
-	return dbHelper.GetRideByID(db, rideID)
+	return repository.GetRideByID(db, rideID)
 }
 
 func AcceptRide(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
@@ -59,40 +59,40 @@ func AcceptRide(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
 	mu.Lock()
 	defer mu.Unlock()
 
-	if err := dbHelper.AcceptRide(db, rideID, driverID); err != nil {
+	if err := repository.AcceptRide(db, rideID, driverID); err != nil {
 		return nil, err
 	}
-	if err := dbHelper.UpdateDriverStatus(db, driverID, models.DriverStatusOnTrip); err != nil {
+	if err := repository.UpdateDriverStatus(db, driverID, models.DriverStatusOnTrip); err != nil {
 		return nil, err
 	}
-	return dbHelper.GetRideByID(db, rideID)
+	return repository.GetRideByID(db, rideID)
 }
 
 func RejectRide(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
 	mu := lockForRide(rideID)
 	mu.Lock()
 	defer mu.Unlock()
-	if err := dbHelper.RejectRide(db, rideID, driverID); err != nil {
+	if err := repository.RejectRide(db, rideID, driverID); err != nil {
 		return nil, err
 	}
-	return dbHelper.GetRideByID(db, rideID)
+	return repository.GetRideByID(db, rideID)
 }
 
 func CompleteRide(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
-	return dbHelper.MarkRideCompleted(db, rideID, driverID)
+	return repository.MarkRideCompleted(db, rideID, driverID)
 }
 
 func GetAllRides(db *sqlx.DB, driverID string) ([]models.Ride, error) {
-	return dbHelper.GetAllDriverRides(db, driverID)
+	return repository.GetAllDriverRides(db, driverID)
 }
 
 func CalculateFare(db *sqlx.DB, rideID string, driverID string) (float64, error) {
-	status, err := dbHelper.GetRideStatus(db, rideID)
+	status, err := repository.GetRideStatus(db, rideID)
 	if err != nil {
 		return 0, err
 	}
 
-	fair, err := dbHelper.CalculateFare(db, rideID, driverID, status)
+	fair, err := repository.CalculateFare(db, rideID, driverID, status)
 	if err != nil {
 		return 0, err
 	}

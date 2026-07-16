@@ -1,16 +1,16 @@
 package services
 
 import (
-	"TravelBackend/database/dbHelper"
+	"TravelBackend/database/repository"
 	"TravelBackend/models"
 
 	"github.com/jmoiron/sqlx"
 )
 
 func UpdateDriverLocation(db *sqlx.DB, driverID string, lat, lng float64) error {
-	return dbHelper.UpdateDriverLocation(db, driverID, lat, lng)
+	return repository.UpdateDriverLocation(db, driverID, lat, lng)
 }
 
 func DriverLocation(db *sqlx.DB, driverID string) (*models.DriverLocation, error) {
-	return dbHelper.DriverCurrentLocation(db, driverID)
+	return repository.DriverCurrentLocation(db, driverID)
 }

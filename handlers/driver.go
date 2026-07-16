@@ -9,7 +9,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"TravelBackend/database/dbHelper"
+	"TravelBackend/database/repository"
 	"TravelBackend/models"
 	"TravelBackend/utils"
 )
@@ -175,7 +175,7 @@ func DeleteDriver(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 		return
 	}
 
-	err := dbHelper.DeleteDriver(db, id)
+	err := repository.DeleteDriver(db, id)
 	if err == models.ErrDriverNotFound {
 		utils.RespondError(w, http.StatusNotFound, "driver not found")
 		return
