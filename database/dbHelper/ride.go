@@ -3,9 +3,9 @@ package dbHelper
 import (
 	"database/sql"
 
-	"github.com/jmoiron/sqlx"
-
 	"TravelBackend/models"
+
+	"github.com/jmoiron/sqlx"
 )
 
 func FindNearbyDrivers(db *sqlx.DB, lat, lng float64) ([]models.NearbyDriver, error) {
@@ -220,4 +220,17 @@ func GetAllDriverRides(db *sqlx.DB, driver_id string) ([]models.Ride, error) {
 		return nil, err
 	}
 	return rides, nil
+}
+
+func GetRideStatus(db *sqlx.DB, rideID string, status string) (string, error) {
+	//var ride models.Ride
+
+	query := `SELECT status FROM rides WHERE id = $1`
+
+	err := db.QueryRow(query, rideID).Scan(&status)
+	if err != nil {
+		return "", err
+	}
+
+	return status, nil
 }
