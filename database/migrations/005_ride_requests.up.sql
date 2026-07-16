@@ -18,7 +18,7 @@ ALTER TABLE rides
     ADD CONSTRAINT rides_status_check CHECK
         (
         status IN ('REQUESTED', 'ACCEPTED', 'REJECTED',
-                   'CANCELLED', 'COMPLETED', 'NO_DRIVERS_FOUN')
+                   'CANCELLED', 'COMPLETED', 'NO_DRIVERS_FOUND','REACHED_AT_DESTINATION')
     );
 
 

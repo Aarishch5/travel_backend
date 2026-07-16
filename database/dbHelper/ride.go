@@ -20,7 +20,7 @@ func FindNearbyDrivers(db *sqlx.DB, lat, lng float64) ([]models.NearbyDriver, er
 			JOIN drivers d ON d.id = dl.driver_id
 			WHERE d.status = 'ONLINE'
 		) sub
-		WHERE distance_km < 5 ORDER BY distance_km LIMIT 5`
+		WHERE distance_km < 5 ORDER BY distance_km LIMIT 10`
 
 	var drivers []models.NearbyDriver
 	err := db.Select(&drivers, query, lat, lng)
@@ -195,19 +195,19 @@ func MarkRideCompleted(db *sqlx.DB, rideID, driverID string) (*models.Ride, erro
 		return nil, err
 	}
 
-	if distanceMeters > 10 {
+	if distanceMeters > 50 {
 		return nil, models.ErrNotAtDroppingLocation
 	}
 
-	_, err = db.Exec(`UPDATE rides SET status = 'COMPLETED', completed_at = now(), updated_at = now() WHERE id = $1`, rideID)
+	_, err = db.Exec(`UPDATE rides SET status = 'REACHED_AT_DESTINATION', completed_at = now(), updated_at = now() WHERE id = $1`, rideID)
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = db.Exec(`UPDATE drivers SET status = 'ONLINE' WHERE id = $1`, driverID)
-	if err != nil {
-		return nil, err
-	}
+	//_, err = db.Exec(`UPDATE drivers SET status = 'ONLINE' WHERE id = $1`, driverID)
+	//if err != nil {
+	//	return nil, err
+	//}
 	return GetRideByID(db, rideID)
 }
 
