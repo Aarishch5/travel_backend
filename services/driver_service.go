@@ -51,7 +51,7 @@ func LoginDriver(db *sqlx.DB, req models.LoginDriverRequest) (string, *models.Dr
 		return "", nil, models.ErrInvalidCredentials
 	}
 
-	token, err := utils.GenerateToken(driver.ID, "driver")
+	token, err := utils.GenerateToken(driver.ID, models.RoleDriver)
 	if err != nil {
 		return "", nil, err
 	}

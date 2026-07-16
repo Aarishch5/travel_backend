@@ -3,6 +3,7 @@ package server
 import (
 	"TravelBackend/handlers"
 	"TravelBackend/middleware"
+	"TravelBackend/models"
 	"context"
 	"net/http"
 	"time"
@@ -47,21 +48,21 @@ func registerDriverRoutes(mux *http.ServeMux, db *sqlx.DB) {
 	mux.HandleFunc("/v1/drivers/login", public(handlers.LoginDriver, db))
 	mux.HandleFunc("/v1/drivers/delete", public(handlers.DeleteDriver, db))
 
-	mux.HandleFunc("/v1/drivers/status", protected("driver", handlers.UpdateDriverStatus, db))
+	mux.HandleFunc("/v1/drivers/status", protected(models.RoleDriver, handlers.UpdateDriverStatus, db))
 	//mux.HandleFunc("/v1/drivers/location", protected("driver", handlers.UpdateDriverLocation, db))
 	//mux.HandleFunc("/v1/drivers/location", protected("driver", handlers.GetDriverLocation, db))
-	mux.HandleFunc("/v1/drivers/location", protected("driver", handlers.DriverLocationHandler, db))
-	mux.HandleFunc("/v1/drivers/rides/pending", protected("driver", handlers.GetPendingRides, db))
-	mux.HandleFunc("/v1/drivers/rides", protected("driver", handlers.GetAllRides, db))
+	mux.HandleFunc("/v1/drivers/location", protected(models.RoleDriver, handlers.DriverLocationHandler, db))
+	mux.HandleFunc("/v1/drivers/rides/pending", protected(models.RoleDriver, handlers.GetPendingRides, db))
+	mux.HandleFunc("/v1/drivers/rides", protected(models.RoleDriver, handlers.GetAllRides, db))
 
 }
 
 func registerRideRoutes(mux *http.ServeMux, db *sqlx.DB) {
-	mux.HandleFunc("/v1/rides/request", protected("rider", handlers.RequestRide, db))
-	mux.HandleFunc("/v1/rides/{id}/accept", protected("driver", handlers.AcceptRide, db))
-	mux.HandleFunc("/v1/rides/{id}/reject", protected("driver", handlers.RejectRide, db))
-	mux.HandleFunc("/v1/rides/{id}/complete", protected("driver", handlers.RideCompleted, db))
-	mux.HandleFunc("/v1/rides/{rideID}/fare", protected("driver", handlers.CalculateFareHandler, db))
+	mux.HandleFunc("/v1/rides/request", protected(models.RoleRider, handlers.RequestRide, db))
+	mux.HandleFunc("/v1/rides/{id}/accept", protected(models.RoleDriver, handlers.AcceptRide, db))
+	mux.HandleFunc("/v1/rides/{id}/reject", protected(models.RoleDriver, handlers.RejectRide, db))
+	mux.HandleFunc("/v1/rides/{id}/complete", protected(models.RoleDriver, handlers.RideCompleted, db))
+	mux.HandleFunc("/v1/rides/{rideID}/fare", protected(models.RoleDriver, handlers.CalculateFareHandler, db))
 
 }
 

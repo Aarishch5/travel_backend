@@ -51,7 +51,7 @@ func LoginRider(db *sqlx.DB, req models.LoginRiderRequest) (string, *models.Ride
 		return "", nil, models.ErrInvalidCredentials
 	}
 
-	token, err := utils.GenerateToken(rider.ID, "rider")
+	token, err := utils.GenerateToken(rider.ID, models.RoleRider)
 	if err != nil {
 		return "", nil, err
 	}
