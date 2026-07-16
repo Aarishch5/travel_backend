@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 
@@ -44,4 +45,30 @@ func UpdateDriverLocation(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 	utils.RespondJSON(w, http.StatusOK, map[string]string{
 		"message": "location updated successfully",
 	})
+}
+
+func GetDriverLocation(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
+	if r.Method != http.MethodGet {
+		utils.RespondError(w, http.StatusMethodNotAllowed, "only GET is allowed")
+		return
+	}
+
+	claims, ok := middleware.ClaimsFromContext(r.Context())
+	if !ok {
+		utils.RespondError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	driverID := claims.UserID
+	if driverID == "" || strings.TrimSpace(driverID) == "" {
+		utils.RespondError(w, http.StatusNotFound, "driver id or user is required")
+		return
+	}
+
+	driverLocation, err := services.DriverLocation(db, driverID)
+	if err != nil {
+		utils.RespondError(w, http.StatusNotFound, "driver location not found")
+		return
+	}
+	utils.RespondJSON(w, http.StatusOK, driverLocation)
 }

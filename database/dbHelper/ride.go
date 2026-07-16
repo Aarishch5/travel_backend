@@ -234,3 +234,7 @@ func GetRideStatus(db *sqlx.DB, rideID string, status string) (string, error) {
 
 	return status, nil
 }
+
+//func CalculateFair(db *sqlx.DB, rideID string, status string) (string, error) {
+//
+//}

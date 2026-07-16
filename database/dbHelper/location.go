@@ -1,6 +1,9 @@
 package dbHelper
 
 import (
+	"TravelBackend/models"
+	"database/sql"
+
 	"github.com/jmoiron/sqlx"
 )
 
@@ -12,4 +15,21 @@ func UpsertDriverLocation(db *sqlx.DB, driverID string, lat, lng float64) error 
 		DO UPDATE SET latitude = $2, longitude = $3, updated_at = now()`
 	_, err := db.Exec(query, driverID, lat, lng)
 	return err
+}
+
+func DriverCurrentLocation(db *sqlx.DB, driver_id string) (*models.DriverLocation, error) {
+
+	query := `SELECT driver_id, latitude, longitude, updated_at FROM drivers WHERE id = $1`
+
+	var driverLocationInfo models.DriverLocation
+
+	err := db.Get(&driverLocationInfo, query, driver_id)
+	if err == sql.ErrNoRows {
+		return nil, models.ErrDriverNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return &driverLocationInfo, nil
 }
