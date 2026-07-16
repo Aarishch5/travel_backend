@@ -13,7 +13,9 @@ func UpsertDriverLocation(db *sqlx.DB, driverID string, lat, lng float64) error 
 		VALUES ($1, $2, $3, now())
 		ON CONFLICT (driver_id)
 		DO UPDATE SET latitude = $2, longitude = $3, updated_at = now()`
+
 	_, err := db.Exec(query, driverID, lat, lng)
+
 	return err
 }
 

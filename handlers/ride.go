@@ -70,19 +70,12 @@ func AcceptRide(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 	}
 
 	ride, err := services.AcceptRide(db, rideID, claims.UserID)
-	switch err {
-	case nil:
-		utils.RespondJSON(w, http.StatusOK, ride)
-	case models.ErrRideAlreadyTaken:
-		utils.RespondError(w, http.StatusConflict, "another driver already accepted this ride")
-	case models.ErrOfferNotFound:
-		utils.RespondError(w, http.StatusConflict, "you were not offered this ride or already responded")
-	case models.ErrRideNotFound:
-		utils.RespondError(w, http.StatusNotFound, "ride not found")
-	default:
+
+	if err != nil {
 		log.Println("AcceptRide error:", err)
 		utils.RespondError(w, http.StatusInternalServerError, "could not accept ride")
 	}
+	utils.RespondJSON(w, http.StatusOK, ride)
 }
 
 func RejectRide(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
@@ -104,17 +97,11 @@ func RejectRide(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 	}
 
 	ride, err := services.RejectRide(db, rideID, claims.UserID)
-	switch err {
-	case nil:
-		utils.RespondJSON(w, http.StatusOK, ride)
-	case models.ErrOfferNotFound:
-		utils.RespondError(w, http.StatusConflict, "you were not offered this ride or already responded")
-	case models.ErrRideNotFound:
-		utils.RespondError(w, http.StatusNotFound, "ride not found")
-	default:
+
+	if err != nil {
 		log.Println("RejectRide error:", err)
-		utils.RespondError(w, http.StatusInternalServerError, "could not reject ride")
 	}
+	utils.RespondJSON(w, http.StatusOK, ride)
 }
 
 func GetPendingRides(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
@@ -158,19 +145,11 @@ func RideCompleted(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 	}
 
 	ride, err := services.CompleteRide(db, rideID, claims.UserID)
-	switch err {
-	case nil:
-		utils.RespondJSON(w, http.StatusOK, ride)
-	case models.ErrRideNotActive:
-		utils.RespondError(w, http.StatusConflict, "ride is not assigned or  not accepted")
-	case models.ErrNotAtDroppingLocation:
-		utils.RespondError(w, http.StatusConflict, "you are too far from the drop location points")
-	case models.ErrRideNotFound:
-		utils.RespondError(w, http.StatusNotFound, "ride not found")
-	default:
-		log.Println("RideCompleted error:", err)
-		utils.RespondError(w, http.StatusInternalServerError, "could not complete ride")
+
+	if err != nil {
+		log.Println("Ride error:", err)
 	}
+	utils.RespondJSON(w, http.StatusOK, ride)
 
 }
 
