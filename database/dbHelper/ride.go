@@ -210,3 +210,14 @@ func MarkRideCompleted(db *sqlx.DB, rideID, driverID string) (*models.Ride, erro
 	}
 	return GetRideByID(db, rideID)
 }
+
+func GetAllDriverRides(db *sqlx.DB, driver_id string) ([]models.Ride, error) {
+	var rides []models.Ride
+
+	err := db.Select(&rides, `SELECT id, rider_id, driver_id, status, pickup_lat, pickup_lng, drop_lat, drop_lng, requested_at,accepted_at, updated_at, completed_at FROM rides WHERE driver_id = $1`, driver_id)
+
+	if err != nil {
+		return nil, err
+	}
+	return rides, nil
+}

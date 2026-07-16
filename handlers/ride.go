@@ -174,6 +174,35 @@ func RideCompleted(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 
 }
 
+func GetAllRides(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
+
+	if r.Method != http.MethodGet {
+		utils.RespondError(w, http.StatusMethodNotAllowed, "only GET is allowed")
+		return
+	}
+
+	claims, ok := middleware.ClaimsFromContext(r.Context())
+	if !ok {
+		utils.RespondError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	driverID := claims.UserID
+
+	if driverID == "" {
+		utils.RespondError(w, http.StatusBadRequest, "ride id is required")
+		return
+	}
+
+	rides, err := services.GetAllRides(db, driverID)
+	if err != nil {
+		utils.RespondError(w, http.StatusInternalServerError, "could not fetch rides")
+		return
+	}
+
+	utils.RespondJSON(w, http.StatusOK, rides)
+}
+
 //func CalculateFair(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 //
 //}

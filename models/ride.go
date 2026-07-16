@@ -19,6 +19,7 @@ type Ride struct {
 	RequestedAt time.Time  `json:"requested_at" db:"requested_at"`
 	AcceptedAt  *time.Time `json:"accepted_at,omitempty" db:"accepted_at"`
 	UpdatedAt   time.Time  `json:"updated_at" db:"updated_at"`
+	CompletedAt *time.Time `json:"completed_at,omitempty" db:"completed_at"`
 }
 
 type RequestRideRequest struct {

@@ -10,7 +10,7 @@ import (
 	"TravelBackend/utils"
 )
 
-// Create the new rider
+// Creating the new rider
 
 func RegisterRider(db *sqlx.DB, req models.CreateRiderRequest) (*models.Rider, error) {
 	req.Name = strings.TrimSpace(req.Name)
@@ -36,7 +36,7 @@ func RegisterRider(db *sqlx.DB, req models.CreateRiderRequest) (*models.Rider, e
 	return dbHelper.GetRiderByID(db, id)
 }
 
-// validates the registered driver
+// validating the registered driver
 
 func LoginRider(db *sqlx.DB, req models.LoginRiderRequest) (string, *models.Rider, error) {
 	rider, err := dbHelper.GetRiderByEmail(db, req.Email)
