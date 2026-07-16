@@ -61,6 +61,8 @@ func registerRideRoutes(mux *http.ServeMux, db *sqlx.DB) {
 	mux.HandleFunc("/v1/rides/{id}/accept", protected("driver", handlers.AcceptRide, db))
 	mux.HandleFunc("/v1/rides/{id}/reject", protected("driver", handlers.RejectRide, db))
 	mux.HandleFunc("/v1/rides/{id}/complete", protected("driver", handlers.RideCompleted, db))
+	mux.HandleFunc("/v1/rides/{rideID}/fare", protected("driver", handlers.CalculateFareHandler, db))
+
 }
 
 func SetupRoutes(db *sqlx.DB) *Server {

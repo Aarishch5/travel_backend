@@ -26,7 +26,7 @@ func RequestRide(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 		return
 	}
 
-	var req models.RequestRideRequest
+	var req models.RideRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		utils.RespondError(w, http.StatusBadRequest, "invalid request body")
 		return
@@ -182,6 +182,33 @@ func GetAllRides(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 	utils.RespondJSON(w, http.StatusOK, rides)
 }
 
-//func CalculateFair(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
-//
-//}
+func CalculateFareHandler(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
+	if r.Method != http.MethodPatch {
+		utils.RespondError(w, http.StatusMethodNotAllowed, "only PATCH is allowed")
+		return
+	}
+	claims, ok := middleware.ClaimsFromContext(r.Context())
+	if !ok {
+		utils.RespondError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	driverID := claims.UserID
+	if driverID == "" {
+		utils.RespondError(w, http.StatusBadRequest, "driver id is required")
+		return
+	}
+
+	rideID := r.PathValue("rideID")
+	if rideID == "" {
+		utils.RespondError(w, http.StatusBadRequest, "ride id is required")
+		return
+	}
+
+	fair, err := services.CalculateFare(db, rideID, driverID)
+	if err != nil {
+		log.Println("CalculateFair error:", err)
+		utils.RespondError(w, http.StatusInternalServerError, "error calculating fair")
+		return
+	}
+	utils.RespondJSON(w, http.StatusOK, fair)
+}

@@ -3,8 +3,9 @@ package models
 import "time"
 
 const (
-	RideStatusRequested = "REQUESTED"
-	RideStatusAccepted  = "ACCEPTED"
+	RideStatusRequested     = "REQUESTED"
+	RideStatusAccepted      = "ACCEPTED"
+	RideStatusReachedAtDest = "REACHED_AT_DESTINATION"
 )
 
 type Ride struct {
@@ -22,7 +23,7 @@ type Ride struct {
 	CompletedAt *time.Time `json:"completed_at,omitempty" db:"completed_at"`
 }
 
-type RequestRideRequest struct {
+type RideRequest struct {
 	PickupLat float64 `json:"pickup_lat"`
 	PickupLng float64 `json:"pickup_lng"`
 	DropLat   float64 `json:"drop_lat"`

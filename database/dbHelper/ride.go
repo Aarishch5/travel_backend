@@ -1,9 +1,9 @@
 package dbHelper
 
 import (
-	"database/sql"
-
 	"TravelBackend/models"
+	"database/sql"
+	"errors"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -27,7 +27,7 @@ func FindNearbyDrivers(db *sqlx.DB, lat, lng float64) ([]models.NearbyDriver, er
 	return drivers, err
 }
 
-func CreateRide(db *sqlx.DB, riderID string, req models.RequestRideRequest) (string, error) {
+func CreateRide(db *sqlx.DB, riderID string, req models.RideRequest) (string, error) {
 	var id string
 	query := `
 		INSERT INTO rides (rider_id, pickup_lat, pickup_lng, drop_lat, drop_lng, status)
@@ -222,19 +222,61 @@ func GetAllDriverRides(db *sqlx.DB, driver_id string) ([]models.Ride, error) {
 	return rides, nil
 }
 
-//func GetRideStatus(db *sqlx.DB, rideID string, status string) (string, error) {
-//	//var ride models.Ride
+func GetRideStatus(db *sqlx.DB, rideID string) (string, error) {
+	//var ride models.Ride
+
+	query := `SELECT status FROM rides WHERE id = $1`
+	var status string
+	err := db.QueryRow(query, rideID).Scan(&status)
+	if err != nil {
+		return "", err
+	}
+
+	return status, nil
+}
+
+//func GetDriverIdByRideId(db *sqlx.DB, rideID string) (string, error) {
 //
-//	query := `SELECT status FROM rides WHERE id = $1`
+//	query := `SELECT driver_id FROM rides WHERE id = $1`
+//	var driverID string
+//	err := db.QueryRow(query, rideID).Scan(&driverID)
 //
-//	err := db.QueryRow(query, rideID).Scan(&status)
 //	if err != nil {
 //		return "", err
 //	}
-//
-//	return status, nil
+//	return driverID, nil
 //}
 
-//func CalculateFair(db *sqlx.DB, rideID string, status string) (string, error) {
-//
-//}
+func CalculateFare(db *sqlx.DB, ride_ID string, driverID string, status string) (float64, error) {
+
+	query := `SELECT pickup_lat, pickup_lng, drop_lat, drop_lng FROM rides WHERE id = $1`
+	var locationPoints models.RideRequest
+	err := db.QueryRow(query, ride_ID).Scan(
+		&locationPoints.PickupLat, &locationPoints.PickupLng,
+		&locationPoints.DropLat, &locationPoints.DropLng,
+	)
+
+	if err != nil {
+		return 0, err
+	}
+
+	lat1, lng1, lat2, lng2 := locationPoints.PickupLat, locationPoints.PickupLng, locationPoints.DropLat, locationPoints.DropLng
+
+	dist := models.CalculateDistance(lat1, lng1, lat2, lng2)
+	if dist < 1 {
+		return 0, errors.New("distance is too low")
+	}
+
+	fair := 40 + (dist * 12)
+
+	if status != models.RideStatusReachedAtDest {
+		return 0, errors.New("ride is not completed yet")
+	}
+
+	query = `UPDATE rides SET fare = $1 WHERE id = $2 AND driver_id = $3 AND status = $4`
+	_, err = db.Exec(query, fair, ride_ID, driverID, status)
+	if err != nil {
+		return 0, err
+	}
+	return fair, nil
+}

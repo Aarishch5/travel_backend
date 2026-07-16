@@ -24,7 +24,7 @@ func lockForRide(rideID string) *sync.Mutex {
 	return rideLocks[rideID]
 }
 
-func RequestRide(db *sqlx.DB, riderID string, req models.RequestRideRequest) (*models.Ride, error) {
+func RequestRide(db *sqlx.DB, riderID string, req models.RideRequest) (*models.Ride, error) {
 	rideID, err := dbHelper.CreateRide(db, riderID, req)
 	if err != nil {
 		return nil, err
@@ -84,4 +84,18 @@ func CompleteRide(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
 
 func GetAllRides(db *sqlx.DB, driverID string) ([]models.Ride, error) {
 	return dbHelper.GetAllDriverRides(db, driverID)
+}
+
+func CalculateFare(db *sqlx.DB, rideID string, driverID string) (float64, error) {
+	status, err := dbHelper.GetRideStatus(db, rideID)
+	if err != nil {
+		return 0, err
+	}
+
+	fair, err := dbHelper.CalculateFare(db, rideID, driverID, status)
+	if err != nil {
+		return 0, err
+	}
+
+	return fair, nil
 }
