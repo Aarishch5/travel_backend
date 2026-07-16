@@ -82,6 +82,6 @@ func CompleteRide(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
 	return dbHelper.MarkRideCompleted(db, rideID, driverID)
 }
 
-func GetAllRides(db *sqlx.DB, driverID string) ([]*models.Ride, error) {
+func GetAllRides(db *sqlx.DB, driverID string) ([]models.Ride, error) {
 	return dbHelper.GetAllDriverRides(db, driverID)
 }
