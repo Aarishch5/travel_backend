@@ -72,3 +72,14 @@ func GetDriverLocation(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 	}
 	utils.RespondJSON(w, http.StatusOK, driverLocation)
 }
+
+func DriverLocationHandler(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
+	switch r.Method {
+	case http.MethodGet:
+		GetDriverLocation(w, r, db)
+	case http.MethodPatch:
+		UpdateDriverLocation(w, r, db)
+	default:
+		utils.RespondError(w, http.StatusMethodNotAllowed, "method not allowed")
+	}
+}

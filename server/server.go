@@ -48,8 +48,9 @@ func registerDriverRoutes(mux *http.ServeMux, db *sqlx.DB) {
 	mux.HandleFunc("/v1/drivers/delete", public(handlers.DeleteDriver, db))
 
 	mux.HandleFunc("/v1/drivers/status", protected("driver", handlers.UpdateDriverStatus, db))
-	mux.HandleFunc("/v1/drivers/location", protected("driver", handlers.UpdateDriverLocation, db))
-	mux.HandleFunc("/v1/drivers/location", protected("driver", handlers.GetDriverLocation, db))
+	//mux.HandleFunc("/v1/drivers/location", protected("driver", handlers.UpdateDriverLocation, db))
+	//mux.HandleFunc("/v1/drivers/location", protected("driver", handlers.GetDriverLocation, db))
+	mux.HandleFunc("/v1/drivers/location", protected("driver", handlers.DriverLocationHandler, db))
 	mux.HandleFunc("/v1/drivers/rides/pending", protected("driver", handlers.GetPendingRides, db))
 	mux.HandleFunc("/v1/drivers/rides", protected("driver", handlers.GetAllRides, db))
 

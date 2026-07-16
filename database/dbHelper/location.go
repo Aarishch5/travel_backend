@@ -19,7 +19,7 @@ func UpsertDriverLocation(db *sqlx.DB, driverID string, lat, lng float64) error 
 
 func DriverCurrentLocation(db *sqlx.DB, driver_id string) (*models.DriverLocation, error) {
 
-	query := `SELECT driver_id, latitude, longitude, updated_at FROM drivers WHERE id = $1`
+	query := `SELECT driver_id, latitude, longitude, updated_at FROM driver_locations WHERE driver_id = $1`
 
 	var driverLocationInfo models.DriverLocation
 
