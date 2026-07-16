@@ -2,7 +2,6 @@ package dbHelper
 
 import (
 	"database/sql"
-	"errors"
 
 	"github.com/jmoiron/sqlx"
 
@@ -62,7 +61,7 @@ func DeleteRider(db *sqlx.DB, id string) error {
 		return err
 	}
 	if rows == 0 {
-		return errors.New("rider not found")
+		return models.ErrRiderNotFound
 	}
 	return nil
 }
