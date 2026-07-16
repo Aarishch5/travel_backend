@@ -8,7 +8,7 @@ import (
 )
 
 func UpdateDriverLocation(db *sqlx.DB, driverID string, lat, lng float64) error {
-	return dbHelper.UpsertDriverLocation(db, driverID, lat, lng)
+	return dbHelper.UpdateDriverLocation(db, driverID, lat, lng)
 }
 
 func DriverLocation(db *sqlx.DB, driverID string) (*models.DriverLocation, error) {

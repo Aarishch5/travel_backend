@@ -7,7 +7,9 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func UpsertDriverLocation(db *sqlx.DB, driverID string, lat, lng float64) error {
+func UpdateDriverLocation(db *sqlx.DB, driverID string, lat, lng float64) error {
+	//query1 := `SELECT COUNT(*) FROM driver_locations WHERE driver_id = $1;`
+
 	query := `
 		INSERT INTO driver_locations (driver_id, latitude, longitude, updated_at)
 		VALUES ($1, $2, $3, now())
@@ -26,6 +28,7 @@ func DriverCurrentLocation(db *sqlx.DB, driver_id string) (*models.DriverLocatio
 	var driverLocationInfo models.DriverLocation
 
 	err := db.Get(&driverLocationInfo, query, driver_id)
+
 	if err == sql.ErrNoRows {
 		return nil, models.ErrDriverNotFound
 	}

@@ -22,7 +22,7 @@ func CreateDriver(db *sqlx.DB, req models.CreateDriverRequest, passwordHash stri
 
 func GetDriverByEmailOrPhone(db *sqlx.DB, email, phone string) (bool, error) {
 	var exists bool
-	query := `SELECT EXISTS(SELECT 1 FROM drivers WHERE email = $1 OR phone = $2)`
+	query := `SELECT COUNT(*)>0 FROM drivers WHERE email = $1 AND phone = $2`
 	err := db.Get(&exists, query, email, phone)
 	return exists, err
 }
@@ -56,10 +56,14 @@ func GetDriverByEmail(db *sqlx.DB, email string) (*models.Driver, error) {
 }
 
 func UpdateDriverStatus(db *sqlx.DB, id, status string) error {
-	result, err := db.Exec(`UPDATE drivers SET status = $1 WHERE id = $2`, status, id)
+
+	query := `UPDATE drivers SET status = $1 WHERE id = $2`
+
+	result, err := db.Exec(query, status, id)
 	if err != nil {
 		return err
 	}
+
 	rows, err := result.RowsAffected()
 	if err != nil {
 		return err
@@ -71,11 +75,16 @@ func UpdateDriverStatus(db *sqlx.DB, id, status string) error {
 }
 
 func DeleteDriver(db *sqlx.DB, id string) error {
-	result, err := db.Exec(`UPDATE drivers SET archived_at=now() WHERE id = $1`, id)
+
+	query := `UPDATE drivers SET archived_at=now() WHERE id = $1`
+
+	result, err := db.Exec(query, id)
+
 	if err != nil {
 		return err
 	}
 	rows, err := result.RowsAffected()
+
 	if err != nil {
 		return err
 	}
