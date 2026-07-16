@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"TravelBackend/services"
-	"encoding/json"
 	"log"
 	"net/http"
 	"strings"
@@ -21,7 +20,11 @@ func RegisterRider(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 	}
 
 	var req models.CreateRiderRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	//if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	//	utils.RespondError(w, http.StatusBadRequest, "invalid request body")
+	//	return
+	//}
+	if err := utils.ParseBody(r.Body, &req); err != nil {
 		utils.RespondError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
@@ -82,7 +85,11 @@ func LoginRider(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 	}
 
 	var req models.LoginRiderRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	//if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	//	utils.RespondError(w, http.StatusBadRequest, "invalid request body")
+	//	return
+	//}
+	if err := utils.ParseBody(r.Body, &req); err != nil {
 		utils.RespondError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
