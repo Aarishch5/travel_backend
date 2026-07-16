@@ -15,7 +15,8 @@ ALTER TABLE ride_offers
         status IN ('PENDING', 'ACCEPTED', 'REJECTED', 'EXPIRED')
         );
 
+ALTER TABLE IF EXISTS drivers ADD COLUMN IF NOT EXISTS archived_at timestamptz;
 
-
+ALTER TABLE IF EXISTS riders ADD COLUMN IF NOT EXISTS archived_at timestamptz;
 
 COMMIT;

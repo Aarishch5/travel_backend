@@ -7,6 +7,4 @@ CREATE TABLE IF NOT EXISTS driver_locations (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
     );
 
-
-
 COMMIT;

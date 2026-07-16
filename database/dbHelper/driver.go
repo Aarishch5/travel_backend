@@ -71,7 +71,7 @@ func UpdateDriverStatus(db *sqlx.DB, id, status string) error {
 }
 
 func DeleteDriver(db *sqlx.DB, id string) error {
-	result, err := db.Exec(`DELETE FROM drivers WHERE id = $1`, id)
+	result, err := db.Exec(`UPDATE drivers SET archived_at=now() WHERE id = $1`, id)
 	if err != nil {
 		return err
 	}

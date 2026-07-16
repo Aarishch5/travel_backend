@@ -53,7 +53,7 @@ func GetRiderByEmail(db *sqlx.DB, email string) (*models.Rider, error) {
 }
 
 func DeleteRider(db *sqlx.DB, id string) error {
-	result, err := db.Exec(`DELETE FROM riders WHERE id = $1`, id)
+	result, err := db.Exec(`UPDATE riders SET archived_at=now() WHERE id = $1`, id)
 	if err != nil {
 		return err
 	}

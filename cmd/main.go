@@ -20,7 +20,7 @@ func main() {
 
 	err := database.OpenConnection()
 	if err != nil {
-		log.Fatal("Error connecting to database")
+		log.Fatalf("Error connecting to database %v", err)
 	}
 	defer database.DB.Close()
 

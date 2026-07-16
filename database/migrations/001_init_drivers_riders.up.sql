@@ -22,4 +22,5 @@ CREATE TABLE IF NOT EXISTS riders (
     created_at TIMESTAMPTZ  DEFAULT now()
     );
 
+
 COMMIT;

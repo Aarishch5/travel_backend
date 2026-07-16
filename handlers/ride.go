@@ -173,3 +173,7 @@ func RideCompleted(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 	}
 
 }
+
+//func CalculateFair(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
+//
+//}
