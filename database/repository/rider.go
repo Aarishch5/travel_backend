@@ -20,7 +20,7 @@ func CreateRider(db *sqlx.DB, req models.CreateRiderRequest, passwordHash string
 
 func GetRiderByEmailOrPhone(db *sqlx.DB, email, phone string) (bool, error) {
 	var exists bool
-	query := `SELECT EXISTS(SELECT 1 FROM riders WHERE email = $1 OR phone = $2)`
+	query := `SELECT COUNT(*)>0 FROM riders WHERE email = $1 AND phone = $2`
 	err := db.Get(&exists, query, email, phone)
 	return exists, err
 }

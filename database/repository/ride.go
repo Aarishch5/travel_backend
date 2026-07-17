@@ -241,10 +241,13 @@ func GetRideStatus(db *sqlx.DB, rideID string) (string, error) {
 }
 
 func CalculateFare(db *sqlx.DB, ride_ID string, driverID string, status string) (float64, error) {
-
+	tx, err := db.Beginx()
+	if err != nil {
+		return 0, err
+	}
 	query := `SELECT pickup_lat, pickup_lng, drop_lat, drop_lng FROM rides WHERE id = $1`
 	var locationPoints models.RideRequest
-	err := db.QueryRow(query, ride_ID).Scan(
+	err = tx.QueryRow(query, ride_ID).Scan(
 		&locationPoints.PickupLat, &locationPoints.PickupLng,
 		&locationPoints.DropLat, &locationPoints.DropLng,
 	)
@@ -255,17 +258,12 @@ func CalculateFare(db *sqlx.DB, ride_ID string, driverID string, status string) 
 
 	lat1, lng1, lat2, lng2 := locationPoints.PickupLat, locationPoints.PickupLng, locationPoints.DropLat, locationPoints.DropLng
 
-	dist := models.CalculateDistance(lat1, lng1, lat2, lng2)
-	if dist < 1 {
+	distance := models.CalculateDistance(lat1, lng1, lat2, lng2)
+	if distance < 1 {
 		return 0, errors.New("distance is too low")
 	}
 
-	fare := 40 + (dist * 12)
-
-	tx, err := db.Beginx()
-	if err != nil {
-		return 0, err
-	}
+	fare := 40 + (distance * 12)
 
 	defer tx.Rollback()
 
