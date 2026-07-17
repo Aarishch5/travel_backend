@@ -51,6 +51,7 @@ func GetRideByID(db *sqlx.DB, rideID string) (*models.Ride, error) {
 		FROM rides WHERE id = $1`
 
 	err := db.Get(&ride, query, rideID)
+
 	if err == sql.ErrNoRows {
 		return nil, models.ErrRideNotFound
 	}

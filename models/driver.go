@@ -3,17 +3,16 @@ package models
 import "time"
 
 type Driver struct {
-	ID            string `json:"id" db:"id"`
-	Name          string `json:"name" db:"name"`
-	Email         string `json:"email" db:"email"`
-	Phone         string `json:"phone" db:"phone"`
-	LicenseNumber string `json:"license_number" db:"license_number"`
-	VehicleModel  string `json:"vehicle_model" db:"vehicle_model"`
-	PlateNumber   string `json:"plate_number" db:"plate_number"`
-
-	CreatedAt    time.Time `json:"created_at" db:"created_at"`
-	Status       string    `json:"status" db:"status"`
-	PasswordHash string    `json:"-" db:"password_hash"`
+	ID            string    `json:"id" db:"id"`
+	Name          string    `json:"name" db:"name"`
+	Email         string    `json:"email" db:"email"`
+	Phone         string    `json:"phone" db:"phone"`
+	LicenseNumber string    `json:"license_number" db:"license_number"`
+	VehicleModel  string    `json:"vehicle_model" db:"vehicle_model"`
+	PlateNumber   string    `json:"plate_number" db:"plate_number"`
+	CreatedAt     time.Time `json:"created_at" db:"created_at"`
+	Status        string    `json:"status" db:"status"`
+	PasswordHash  string    `json:"-" db:"password_hash"`
 }
 
 type CreateDriverRequest struct {

@@ -27,8 +27,11 @@ func GetRiderByEmailOrPhone(db *sqlx.DB, email, phone string) (bool, error) {
 
 func GetRiderByID(db *sqlx.DB, id string) (*models.Rider, error) {
 	var r models.Rider
+
 	query := `SELECT id, name, email, phone, created_at FROM riders WHERE id = $1`
+
 	err := db.Get(&r, query, id)
+
 	if err == sql.ErrNoRows {
 		return nil, models.ErrRiderNotFound
 	}

@@ -16,6 +16,7 @@ func RegisterDriver(db *sqlx.DB, req models.CreateDriverRequest) (*models.Driver
 	req.Name = strings.TrimSpace(req.Name)
 
 	exists, err := repository.GetDriverByEmailOrPhone(db, req.Email, req.Phone)
+
 	if err != nil {
 		return nil, err
 	}
@@ -40,9 +41,11 @@ func RegisterDriver(db *sqlx.DB, req models.CreateDriverRequest) (*models.Driver
 
 func LoginDriver(db *sqlx.DB, req models.LoginDriverRequest) (string, *models.Driver, error) {
 	driver, err := repository.GetDriverByEmail(db, req.Email)
+
 	if err == models.ErrDriverNotFound {
 		return "", nil, models.ErrInvalidCredentials
 	}
+
 	if err != nil {
 		return "", nil, err
 	}

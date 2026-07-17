@@ -25,7 +25,9 @@ func lockForRide(rideID string) *sync.Mutex {
 }
 
 func RequestRide(db *sqlx.DB, riderID string, req models.RideRequest) (*models.Ride, error) {
+
 	rideID, err := repository.CreateRide(db, riderID, req)
+
 	if err != nil {
 		return nil, err
 	}
