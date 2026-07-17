@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS drivers (
     license_number VARCHAR(50)  UNIQUE NOT NULL,
     vehicle_model  VARCHAR(50),
     plate_number   VARCHAR(20),
-    avg_rating     NUMERIC(3,2) DEFAULT 5.0,
+
     created_at     TIMESTAMPTZ  DEFAULT now(),
     archived_at TIMESTAMPTZ,
     password_hash TEXT NOT NULL DEFAULT '',
