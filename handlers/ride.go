@@ -148,7 +148,7 @@ func ReachAtDestination(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 		return
 	}
 
-	ride, err := services.ReachAtDest(db, rideID, claims.UserID)
+	ride, err := services.ReachedAtDestination(db, rideID, claims.UserID)
 
 	if err != nil {
 		log.Println("Ride error:", err)

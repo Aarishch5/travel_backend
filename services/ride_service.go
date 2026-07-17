@@ -15,7 +15,9 @@ var (
 )
 
 func lockForRide(rideID string) *sync.Mutex {
+
 	rideLocksMu.Lock()
+
 	defer rideLocksMu.Unlock()
 
 	if _, ok := rideLocks[rideID]; !ok {
@@ -80,7 +82,7 @@ func RejectRide(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
 	return repository.GetRideByID(db, rideID)
 }
 
-func ReachAtDest(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
+func ReachedAtDestination(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
 	return repository.MarkRideReachAtDest(db, rideID, driverID)
 }
 
