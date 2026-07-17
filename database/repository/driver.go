@@ -29,7 +29,7 @@ func GetDriverByEmailOrPhone(db *sqlx.DB, email, phone string) (bool, error) {
 
 func GetDriverByID(db *sqlx.DB, id string) (*models.Driver, error) {
 	var d models.Driver
-	query := `SELECT id, name, email, phone, license_number, vehicle_model, plate_number, avg_rating, created_at
+	query := `SELECT id, name, email, phone, license_number, vehicle_model, plate_number, created_at
 		FROM drivers WHERE id = $1`
 	err := db.Get(&d, query, id)
 	if err == sql.ErrNoRows {
@@ -43,7 +43,7 @@ func GetDriverByID(db *sqlx.DB, id string) (*models.Driver, error) {
 
 func GetDriverByEmail(db *sqlx.DB, email string) (*models.Driver, error) {
 	var d models.Driver
-	query := `SELECT id, name, email, phone, license_number, vehicle_model, plate_number, status, avg_rating, password_hash, created_at
+	query := `SELECT id, name, email, phone, license_number, vehicle_model, plate_number, status, password_hash, created_at
 		FROM drivers WHERE email = $1`
 	err := db.Get(&d, query, email)
 	if err == sql.ErrNoRows {

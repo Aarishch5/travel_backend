@@ -24,10 +24,6 @@ func jwtSecret() []byte {
 	return []byte(secret)
 }
 
-func tokenTTL() time.Duration {
-	return 24 * time.Hour
-}
-
 func GenerateToken(userID, role string) (string, error) {
 	now := time.Now()
 	claims := Claims{
@@ -35,7 +31,7 @@ func GenerateToken(userID, role string) (string, error) {
 		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(now),
-			ExpiresAt: jwt.NewNumericDate(now.Add(tokenTTL())),
+			ExpiresAt: jwt.NewNumericDate(now.Add(24 * time.Hour)),
 		},
 	}
 

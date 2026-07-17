@@ -208,11 +208,11 @@ func CalculateFareHandler(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 		return
 	}
 
-	fair, err := services.CalculateFare(db, rideID, driverID)
+	fare, err := services.CalculateFare(db, rideID, driverID)
 	if err != nil {
 		log.Println("CalculateFair error:", err)
 		utils.RespondError(w, http.StatusInternalServerError, "error calculating fair")
 		return
 	}
-	utils.RespondJSON(w, http.StatusOK, fair)
+	utils.RespondJSON(w, http.StatusOK, fare)
 }

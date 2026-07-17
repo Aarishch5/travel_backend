@@ -79,7 +79,7 @@ func RejectRide(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
 }
 
 func CompleteRide(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
-	return repository.MarkRideCompleted(db, rideID, driverID)
+	return repository.MarkRideReachAtDest(db, rideID, driverID)
 }
 
 func GetAllRides(db *sqlx.DB, driverID string) ([]models.Ride, error) {
@@ -92,10 +92,10 @@ func CalculateFare(db *sqlx.DB, rideID string, driverID string) (float64, error)
 		return 0, err
 	}
 
-	fair, err := repository.CalculateFare(db, rideID, driverID, status)
+	fare, err := repository.CalculateFare(db, rideID, driverID, status)
 	if err != nil {
 		return 0, err
 	}
 
-	return fair, nil
+	return fare, nil
 }

@@ -20,7 +20,7 @@ func FindNearbyDrivers(db *sqlx.DB, lat, lng float64) ([]models.NearbyDriver, er
 			JOIN drivers d ON d.id = dl.driver_id
 			WHERE d.status = 'ONLINE'
 		) sub
-		WHERE distance_km < 5 ORDER BY distance_km LIMIT 10`
+		WHERE distance_km < 5`
 
 	var drivers []models.NearbyDriver
 	err := db.Select(&drivers, query, lat, lng)
@@ -68,7 +68,9 @@ func AcceptRide(db *sqlx.DB, rideID, driverID string) error {
 	defer tx.Rollback()
 
 	var status string
+
 	err = tx.Get(&status, `SELECT status FROM rides WHERE id = $1 FOR UPDATE`, rideID)
+
 	if err == sql.ErrNoRows {
 		return models.ErrRideNotFound
 	}
@@ -83,10 +85,12 @@ func AcceptRide(db *sqlx.DB, rideID, driverID string) error {
 		UPDATE ride_offers SET status = 'ACCEPTED', updated_at = now()
 		WHERE ride_id = $1 AND driver_id = $2 AND status = 'PENDING'`,
 		rideID, driverID)
+
 	if err != nil {
 		return err
 	}
 	rows, err := result.RowsAffected()
+
 	if err != nil {
 		return err
 	}
@@ -115,24 +119,29 @@ func RejectRide(db *sqlx.DB, rideID, driverID string) error {
 	if err != nil {
 		return err
 	}
+
 	defer tx.Rollback()
 
 	result, err := tx.Exec(`
 		UPDATE ride_offers SET status = 'REJECTED', updated_at = now()
 		WHERE ride_id = $1 AND driver_id = $2 AND status = 'PENDING'`,
 		rideID, driverID)
+
 	if err != nil {
 		return err
 	}
 	rows, err := result.RowsAffected()
+
 	if err != nil {
 		return err
 	}
+
 	if rows == 0 {
 		return models.ErrOfferNotFound
 	}
 
 	var remaining int
+
 	err = tx.Get(&remaining, `
 		SELECT count(*) FROM ride_offers WHERE ride_id = $1 AND status = 'PENDING'`, rideID)
 	if err != nil {
@@ -163,7 +172,7 @@ func GetPendingRidesForDriver(db *sqlx.DB, driverID string) ([]models.Ride, erro
 	return rides, err
 }
 
-func MarkRideCompleted(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
+func MarkRideReachAtDest(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
 	ride, err := GetRideByID(db, rideID)
 	if err != nil {
 		return nil, err
@@ -204,10 +213,6 @@ func MarkRideCompleted(db *sqlx.DB, rideID, driverID string) (*models.Ride, erro
 		return nil, err
 	}
 
-	//_, err = db.Exec(`UPDATE drivers SET status = 'ONLINE' WHERE id = $1`, driverID)
-	//if err != nil {
-	//	return nil, err
-	//}
 	return GetRideByID(db, rideID)
 }
 
@@ -267,7 +272,7 @@ func CalculateFare(db *sqlx.DB, ride_ID string, driverID string, status string) 
 		return 0, errors.New("distance is too low")
 	}
 
-	fair := 40 + (dist * 12)
+	fare := 40 + (dist * 12)
 
 	if status != models.RideStatusReachedAtDest {
 		return 0, errors.New("ride is not completed yet")
@@ -280,9 +285,9 @@ func CalculateFare(db *sqlx.DB, ride_ID string, driverID string, status string) 
 	_, err = db.Exec(query, models.DriverStatusOnline, driverID)
 
 	query = `UPDATE rides SET fare = $1 WHERE id = $2 AND driver_id = $3 AND status = $4`
-	_, err = db.Exec(query, fair, ride_ID, driverID, status)
+	_, err = db.Exec(query, fare, ride_ID, driverID, status)
 	if err != nil {
 		return 0, err
 	}
-	return fair, nil
+	return fare, nil
 }
