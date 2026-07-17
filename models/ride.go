@@ -6,6 +6,7 @@ const (
 	RideStatusRequested     = "REQUESTED"
 	RideStatusAccepted      = "ACCEPTED"
 	RideStatusReachedAtDest = "REACHED_AT_DESTINATION"
+	RideStatusCompleted     = "COMPLETED"
 )
 
 type Ride struct {

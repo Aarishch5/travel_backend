@@ -273,6 +273,12 @@ func CalculateFare(db *sqlx.DB, ride_ID string, driverID string, status string) 
 		return 0, errors.New("ride is not completed yet")
 	}
 
+	query = `UPDATE rides SET status = $1 WHERE driver_id = $2`
+	_, err = db.Exec(query, models.RideStatusCompleted, driverID)
+
+	query = `UPDATE drivers SET status = $1 WHERE id = $2`
+	_, err = db.Exec(query, models.DriverStatusOnline, driverID)
+
 	query = `UPDATE rides SET fare = $1 WHERE id = $2 AND driver_id = $3 AND status = $4`
 	_, err = db.Exec(query, fair, ride_ID, driverID, status)
 	if err != nil {
