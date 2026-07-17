@@ -60,6 +60,7 @@ func UpdateDriverStatus(db *sqlx.DB, id, status string) error {
 	query := `UPDATE drivers SET status = $1 WHERE id = $2`
 
 	result, err := db.Exec(query, status, id)
+
 	if err != nil {
 		return err
 	}

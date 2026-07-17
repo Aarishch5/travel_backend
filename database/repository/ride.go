@@ -240,18 +240,6 @@ func GetRideStatus(db *sqlx.DB, rideID string) (string, error) {
 	return status, nil
 }
 
-//func GetDriverIdByRideId(db *sqlx.DB, rideID string) (string, error) {
-//
-//	query := `SELECT driver_id FROM rides WHERE id = $1`
-//	var driverID string
-//	err := db.QueryRow(query, rideID).Scan(&driverID)
-//
-//	if err != nil {
-//		return "", err
-//	}
-//	return driverID, nil
-//}
-
 func CalculateFare(db *sqlx.DB, ride_ID string, driverID string, status string) (float64, error) {
 
 	query := `SELECT pickup_lat, pickup_lng, drop_lat, drop_lng FROM rides WHERE id = $1`
@@ -274,20 +262,34 @@ func CalculateFare(db *sqlx.DB, ride_ID string, driverID string, status string) 
 
 	fare := 40 + (dist * 12)
 
+	tx, err := db.Beginx()
+	if err != nil {
+		return 0, err
+	}
+
+	defer tx.Rollback()
+
 	if status != models.RideStatusReachedAtDest {
 		return 0, errors.New("ride is not completed yet")
 	}
 
 	query = `UPDATE rides SET status = $1 WHERE driver_id = $2`
-	_, err = db.Exec(query, models.RideStatusCompleted, driverID)
+	_, err = tx.Exec(query, models.RideStatusCompleted, driverID)
 
 	query = `UPDATE drivers SET status = $1 WHERE id = $2`
-	_, err = db.Exec(query, models.DriverStatusOnline, driverID)
+	_, err = tx.Exec(query, models.DriverStatusOnline, driverID)
 
 	query = `UPDATE rides SET fare = $1 WHERE id = $2 AND driver_id = $3 AND status = $4`
-	_, err = db.Exec(query, fare, ride_ID, driverID, status)
+	_, err = tx.Exec(query, fare, ride_ID, driverID, status)
+
 	if err != nil {
 		return 0, err
 	}
+
+	err = tx.Commit()
+	if err != nil {
+		return 0, err
+	}
+
 	return fare, nil
 }
