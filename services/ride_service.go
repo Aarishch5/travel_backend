@@ -80,7 +80,7 @@ func RejectRide(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
 	return repository.GetRideByID(db, rideID)
 }
 
-func CompleteRide(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
+func ReachAtDest(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
 	return repository.MarkRideReachAtDest(db, rideID, driverID)
 }
 

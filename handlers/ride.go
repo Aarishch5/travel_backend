@@ -130,7 +130,7 @@ func GetPendingRides(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 	utils.RespondJSON(w, http.StatusOK, rides)
 }
 
-func RideCompleted(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
+func ReachAtDestination(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 	if r.Method != http.MethodPatch {
 		utils.RespondError(w, http.StatusMethodNotAllowed, "only PATCH is allowed")
 		return
@@ -148,7 +148,7 @@ func RideCompleted(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 		return
 	}
 
-	ride, err := services.CompleteRide(db, rideID, claims.UserID)
+	ride, err := services.ReachAtDest(db, rideID, claims.UserID)
 
 	if err != nil {
 		log.Println("Ride error:", err)

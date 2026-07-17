@@ -54,14 +54,13 @@ func registerDriverRoutes(mux *http.ServeMux, db *sqlx.DB) {
 	mux.HandleFunc("/v1/drivers/location", protected(models.RoleDriver, handlers.DriverLocationHandler, db))
 	mux.HandleFunc("/v1/drivers/rides/pending", protected(models.RoleDriver, handlers.GetPendingRides, db))
 	mux.HandleFunc("/v1/drivers/rides", protected(models.RoleDriver, handlers.GetAllRides, db))
-
 }
 
 func registerRideRoutes(mux *http.ServeMux, db *sqlx.DB) {
 	mux.HandleFunc("/v1/rides/request", protected(models.RoleRider, handlers.RequestRide, db))
 	mux.HandleFunc("/v1/rides/{id}/accept", protected(models.RoleDriver, handlers.AcceptRide, db))
 	mux.HandleFunc("/v1/rides/{id}/reject", protected(models.RoleDriver, handlers.RejectRide, db))
-	mux.HandleFunc("/v1/rides/{id}/complete", protected(models.RoleDriver, handlers.RideCompleted, db))
+	mux.HandleFunc("/v1/rides/{id}/complete", protected(models.RoleDriver, handlers.ReachAtDestination, db))
 	mux.HandleFunc("/v1/rides/{rideID}/fare", protected(models.RoleDriver, handlers.CalculateFareHandler, db))
 
 }
