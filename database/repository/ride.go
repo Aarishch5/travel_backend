@@ -209,7 +209,7 @@ func MarkRideReachAtDest(db *sqlx.DB, rideID, driverID string) (*models.Ride, er
 		return nil, models.ErrNotAtDroppingLocation
 	}
 
-	_, err = db.Exec(`UPDATE rides SET status = 'REACHED_AT_DESTINATION', completed_at = now(), updated_at = now() WHERE id = $1`, rideID)
+	_, err = db.Exec(`UPDATE rides SET status = 'REACHED_AT_DESTINATION', updated_at = now() WHERE id = $1`, rideID)
 	if err != nil {
 		return nil, err
 	}

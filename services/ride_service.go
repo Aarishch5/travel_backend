@@ -59,6 +59,7 @@ func RequestRide(db *sqlx.DB, riderID string, req models.RideRequest) (*models.R
 }
 
 func AcceptRide(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
+
 	mu := lockForRide(rideID)
 	mu.Lock()
 	defer mu.Unlock()
@@ -66,8 +67,10 @@ func AcceptRide(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
 	if err := repository.AcceptRide(db, rideID, driverID); err != nil {
 		return nil, err
 	}
+
 	if err := repository.UpdateDriverStatus(db, driverID, models.DriverStatusOnTrip); err != nil {
 		return nil, err
+
 	}
 	return repository.GetRideByID(db, rideID)
 }
@@ -75,10 +78,13 @@ func AcceptRide(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
 func RejectRide(db *sqlx.DB, rideID, driverID string) (*models.Ride, error) {
 	mu := lockForRide(rideID)
 	mu.Lock()
+
 	defer mu.Unlock()
+
 	if err := repository.RejectRide(db, rideID, driverID); err != nil {
 		return nil, err
 	}
+
 	return repository.GetRideByID(db, rideID)
 }
 

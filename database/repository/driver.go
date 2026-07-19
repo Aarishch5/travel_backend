@@ -11,10 +11,9 @@ import (
 
 func CreateDriver(db *sqlx.DB, req models.CreateDriverRequest, passwordHash string) (string, error) {
 	var id string
-	query := `
-		INSERT INTO drivers (name, email, phone, license_number, vehicle_model, plate_number, password_hash)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		RETURNING id`
+	query := `INSERT INTO drivers (name, email, phone, license_number, vehicle_model, plate_number, password_hash)
+		VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`
+
 	err := db.Get(&id, query, req.Name, req.Email, req.Phone, req.LicenseNumber,
 		req.VehicleModel, req.PlateNumber, passwordHash)
 	return id, err
@@ -31,13 +30,16 @@ func GetDriverByID(db *sqlx.DB, id string) (*models.Driver, error) {
 	var d models.Driver
 	query := `SELECT id, name, email, phone, license_number, vehicle_model, plate_number, created_at
 		FROM drivers WHERE id = $1`
+
 	err := db.Get(&d, query, id)
+
 	if err == sql.ErrNoRows {
 		return nil, models.ErrDriverNotFound
 	}
 	if err != nil {
 		return nil, err
 	}
+
 	return &d, nil
 }
 
