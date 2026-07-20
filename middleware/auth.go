@@ -54,5 +54,8 @@ func RequireRole(role string, next http.HandlerFunc) http.HandlerFunc {
 
 func ClaimsFromContext(ctx context.Context) (*utils.Claims, bool) {
 	claims, ok := ctx.Value(ClaimsContextKey).(*utils.Claims)
+	if !ok {
+		return nil, false
+	}
 	return claims, ok
 }

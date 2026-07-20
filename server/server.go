@@ -96,8 +96,6 @@ func (s *Server) Start(addr string) {
 	}()
 }
 
-// to gracefully shut down the server
-
 func (s *Server) Shutdown(ctx context.Context) error {
 	return s.server.Shutdown(ctx)
 }

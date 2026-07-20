@@ -21,10 +21,6 @@ func UpdateDriverLocation(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 	}
 
 	var req models.DriverLocation
-	//if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-	//	utils.RespondError(w, http.StatusBadRequest, "invalid request body")
-	//	return
-	//}
 
 	if err := utils.ParseBody(r.Body, &req); err != nil {
 		utils.RespondError(w, http.StatusBadRequest, "invalid request body")
@@ -69,7 +65,7 @@ func GetDriverLocation(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 		return
 	}
 
-	driverLocation, err := services.DriverLocation(db, driverID)
+	driverLocation, err := services.GetDriverLocation(db, driverID)
 	if err != nil {
 		utils.RespondError(w, http.StatusNotFound, "driver location not found")
 		return

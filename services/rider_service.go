@@ -19,6 +19,7 @@ func RegisterRider(db *sqlx.DB, req models.CreateRiderRequest) (*models.Rider, e
 	if err != nil {
 		return nil, err
 	}
+
 	if exists {
 		return nil, models.ErrEmailOrPhoneExists
 	}
@@ -39,8 +40,10 @@ func RegisterRider(db *sqlx.DB, req models.CreateRiderRequest) (*models.Rider, e
 // validating the registered driver
 
 func LoginRider(db *sqlx.DB, req models.LoginRiderRequest) (string, *models.Rider, error) {
+
 	rider, err := repository.GetRiderByEmail(db, req.Email)
 	if err == models.ErrRiderNotFound {
+
 		return "", nil, models.ErrInvalidCredentials
 	}
 	if err != nil {
