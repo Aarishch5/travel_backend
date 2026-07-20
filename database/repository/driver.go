@@ -21,7 +21,7 @@ func CreateDriver(db *sqlx.DB, req models.CreateDriverRequest, passwordHash stri
 
 func GetDriverByEmailOrPhone(db *sqlx.DB, email, phone string) (bool, error) {
 	var exists bool
-	query := `SELECT COUNT(*)>0 FROM drivers WHERE email = $1 AND phone = $2`
+	query := `SELECT COUNT(*)>0 FROM drivers WHERE email = $1 OR phone = $2`
 	err := db.Get(&exists, query, email, phone)
 	return exists, err
 }

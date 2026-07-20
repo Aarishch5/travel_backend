@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"TravelBackend/middleware"
 	"TravelBackend/services"
 	"log"
 	"net/http"
@@ -117,13 +118,13 @@ func DeleteRider(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 		return
 	}
 
-	id := r.URL.Query().Get("id")
-	if id == "" {
-		utils.RespondError(w, http.StatusBadRequest, "id query parameter is required")
+	claims, ok := middleware.ClaimsFromContext(r.Context())
+	if !ok {
+		utils.RespondError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
 
-	err := repository.DeleteRider(db, id)
+	err := repository.DeleteRider(db, claims.UserID)
 	if err == models.ErrRiderNotFound {
 		utils.RespondError(w, http.StatusNotFound, "rider not found")
 		return

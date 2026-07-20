@@ -169,13 +169,19 @@ func DeleteDriver(w http.ResponseWriter, r *http.Request, db *sqlx.DB) {
 		return
 	}
 
-	id := r.URL.Query().Get("id")
-	if id == "" {
-		utils.RespondError(w, http.StatusBadRequest, "id query parameter is required")
+	claims, ok := middleware.ClaimsFromContext(r.Context())
+	if !ok {
+		utils.RespondError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
 
-	err := repository.DeleteDriver(db, id)
+	//id := r.URL.Query().Get("id")
+	//if id == "" {
+	//	utils.RespondError(w, http.StatusBadRequest, "id query parameter is required")
+	//	return
+	//}
+
+	err := repository.DeleteDriver(db, claims.UserID)
 	if err == models.ErrDriverNotFound {
 		utils.RespondError(w, http.StatusNotFound, "driver not found")
 		return
