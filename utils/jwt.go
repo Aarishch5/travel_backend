@@ -19,7 +19,7 @@ type Claims struct {
 func jwtSecret() []byte {
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
-		secret = "dev-secret-change-me"
+		return nil
 	}
 	return []byte(secret)
 }
