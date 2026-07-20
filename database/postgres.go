@@ -25,9 +25,11 @@ func OpenConnection() error {
 	var err error
 
 	DB, err = sqlx.Connect("postgres", dsn)
+
 	if err != nil {
 		return err
 	}
+
 	DB.SetMaxOpenConns(25)
 	DB.SetMaxIdleConns(25)
 	DB.SetConnMaxIdleTime(5 * time.Minute)
